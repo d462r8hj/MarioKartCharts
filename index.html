@@ -117,6 +117,37 @@
       letter-spacing: 0.2px;
     }
 
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .game-switch {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+      background: rgba(10, 22, 77, 0.35);
+    }
+
+    .game-btn {
+      border: 0;
+      background: transparent;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 7px 11px;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+    }
+
+    .game-btn[aria-pressed="true"] {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
     .card {
       background: var(--card);
       border: 2px solid #dbe4ff;
@@ -335,6 +366,35 @@
       font-size: 0.9rem;
     }
 
+    body.game-mkworld {
+      background:
+        radial-gradient(circle at 10% 15%, rgba(0, 196, 167, 0.28), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(0, 120, 255, 0.24), transparent 28%),
+        radial-gradient(circle at 78% 90%, rgba(98, 228, 255, 0.2), transparent 30%),
+        linear-gradient(160deg, #03131a, #0b2e41);
+    }
+
+    body.game-mkworld .hero {
+      background: linear-gradient(120deg, rgba(0, 196, 167, 0.9), rgba(0, 120, 255, 0.92) 42%, rgba(98, 228, 255, 0.9));
+    }
+
+    body.game-mkworld .controls {
+      background: linear-gradient(135deg, rgba(0, 120, 255, 0.1), rgba(0, 196, 167, 0.12));
+    }
+
+    body.game-mkworld .pill {
+      background: linear-gradient(120deg, #0078ff, #00c4a7);
+    }
+
+    body.game-mkworld thead th {
+      background: #0078ff;
+      border-bottom-color: #0063d2;
+    }
+
+    body.game-mkworld .rank { color: #0063d2; }
+    body.game-mkworld .delta-up { color: #00a98f; }
+    body.game-mkworld .delta-down { color: #0078ff; }
+
     @media (min-width: 860px) {
       .content-grid {
         grid-template-columns: minmax(420px, 0.9fr) minmax(520px, 1.1fr);
@@ -389,6 +449,7 @@
       .wrap { width: 96vw; margin: 12px auto 20px; gap: 12px; }
       .hero { padding: 14px 14px; }
       .hero h1 { font-size: 1.15rem; }
+      .game-btn { font-size: 0.75rem; padding: 6px 8px; }
       .countdown { font-size: 0.76rem; padding: 6px 8px; }
       .section-head { padding: 10px 12px; }
       .section-head h2 { font-size: 0.9rem; }
@@ -412,10 +473,16 @@
     }
   </style>
 </head>
-<body>
+<body class="game-mk8d">
   <main class="wrap">
     <section class="hero">
-      <h1>Mario Kart 8 Deluxe Turnier Dashboard</h1>
+      <div class="hero-top">
+        <h1 id="heroTitle">Mario Kart 8 Deluxe Turnier Dashboard</h1>
+        <div class="game-switch" role="tablist" aria-label="Spiel auswählen">
+          <button id="gameMk8dBtn" class="game-btn" type="button" aria-pressed="true">MK8 Deluxe</button>
+          <button id="gameMkworldBtn" class="game-btn" type="button" aria-pressed="false">Mario Kart World</button>
+        </div>
+      </div>
       <div id="countdownBanner" class="countdown">Nächstes Turnier wird berechnet...</div>
     </section>
 
@@ -505,6 +572,29 @@
       }
     };
 
+    const GAME_CONFIG = {
+      mk8d: {
+        label: "Mario Kart 8 Deluxe",
+        bodyClass: "game-mk8d",
+        title: "Mario Kart 8 Deluxe Turnier Dashboard",
+        weekday: 3,
+        startHour: 20,
+        startMinute: 30,
+        endHour: 22,
+        endMinute: 0
+      },
+      mkworld: {
+        label: "Mario Kart World",
+        bodyClass: "game-mkworld",
+        title: "Mario Kart World Turnier Dashboard",
+        weekday: 7,
+        startHour: 20,
+        startMinute: 0,
+        endHour: 22,
+        endMinute: 0
+      }
+    };
+
     const CHARACTER_META = {
       "mario": { page: "Mario", color: "#e52521" },
       "luigi": { page: "Luigi", color: "#43b047" },
@@ -539,6 +629,8 @@
       allTournamentRows: [],
       availableYears: [],
       selectedYear: null,
+      selectedGame: "mk8d",
+      availableGames: [],
       players: [],
       weekColumns: [],
       selectedWeekIndex: 0,
@@ -560,11 +652,21 @@
       lineTooltip: document.getElementById("lineTooltip"),
       lineTooltipImg: document.getElementById("lineTooltipImg"),
       lineTooltipName: document.getElementById("lineTooltipName"),
-      countdownBanner: document.getElementById("countdownBanner")
+      countdownBanner: document.getElementById("countdownBanner"),
+      heroTitle: document.getElementById("heroTitle"),
+      gameMk8dBtn: document.getElementById("gameMk8dBtn"),
+      gameMkworldBtn: document.getElementById("gameMkworldBtn")
     };
 
     function normalizeKey(value) { return String(value || "").trim().toLowerCase(); }
     function normalizeCharacter(value) { return normalizeKey(value).replace(/\./g, "").replace(/\s+/g, " "); }
+    function normalizeGameKey(value) {
+      const key = normalizeKey(value);
+      if (!key) return "mk8d";
+      if (key === "mk8" || key === "mk8d" || key === "mario kart 8" || key === "mario kart 8 deluxe") return "mk8d";
+      if (key === "mkworld" || key === "mk world" || key === "mario kart world") return "mkworld";
+      return key;
+    }
 
     function toNumber(value) {
       const cleaned = String(value ?? "").trim().replace(",", ".");
@@ -699,31 +801,35 @@
       const now = new Date();
       const berlin = getBerlinNowParts(now);
       const nowMs = now.getTime();
+      const gameCfg = GAME_CONFIG[state.selectedGame] || GAME_CONFIG.mk8d;
 
-      const isWednesday = berlin.weekday === 3;
-      const afterStart = berlin.hour > 20 || (berlin.hour === 20 && berlin.minute >= 30);
-      const beforeEnd = berlin.hour < 22;
+      const isGameDay = berlin.weekday === gameCfg.weekday;
+      const afterStart = berlin.hour > gameCfg.startHour || (berlin.hour === gameCfg.startHour && berlin.minute >= gameCfg.startMinute);
+      const beforeEnd = berlin.hour < gameCfg.endHour || (berlin.hour === gameCfg.endHour && berlin.minute < gameCfg.endMinute);
 
-      if (isWednesday && afterStart && beforeEnd) {
-        const endMs = zonedDateTimeToUtcMs(berlin.year, berlin.month, berlin.day, 22, 0, 0, "Europe/Berlin");
+      if (isGameDay && afterStart && beforeEnd) {
+        const endMs = zonedDateTimeToUtcMs(berlin.year, berlin.month, berlin.day, gameCfg.endHour, gameCfg.endMinute, 0, "Europe/Berlin");
         const remaining = formatDuration(endMs - nowMs);
-        el.countdownBanner.textContent = `Turnier-Time 20:30-22:00 (Berlin) · Rest: ${remaining}`;
+        el.countdownBanner.textContent = `${gameCfg.label} Turnier-Time · Rest: ${remaining}`;
         return;
       }
 
-      let daysUntilWednesday = 0;
-      if (berlin.weekday < 3) {
-        daysUntilWednesday = 3 - berlin.weekday;
-      } else if (berlin.weekday === 3) {
-        daysUntilWednesday = afterStart ? 7 : 0;
+      let daysUntilGameDay = 0;
+      if (berlin.weekday < gameCfg.weekday) {
+        daysUntilGameDay = gameCfg.weekday - berlin.weekday;
+      } else if (berlin.weekday === gameCfg.weekday) {
+        daysUntilGameDay = afterStart ? 7 : 0;
       } else {
-        daysUntilWednesday = 7 - (berlin.weekday - 3);
+        daysUntilGameDay = 7 - (berlin.weekday - gameCfg.weekday);
       }
 
-      const targetDate = addDaysUtc(berlin.year, berlin.month, berlin.day, daysUntilWednesday);
-      const targetMs = zonedDateTimeToUtcMs(targetDate.year, targetDate.month, targetDate.day, 20, 30, 0, "Europe/Berlin");
+      const targetDate = addDaysUtc(berlin.year, berlin.month, berlin.day, daysUntilGameDay);
+      const targetMs = zonedDateTimeToUtcMs(targetDate.year, targetDate.month, targetDate.day, gameCfg.startHour, gameCfg.startMinute, 0, "Europe/Berlin");
       const countdown = formatDuration(targetMs - nowMs);
-      el.countdownBanner.textContent = `Nächstes Turnier: Mittwoch 20:30 (Berlin) · in ${countdown}`;
+      const dayText = gameCfg.weekday === 7 ? "Sonntag" : "Mittwoch";
+      const hh = String(gameCfg.startHour).padStart(2, "0");
+      const mm = String(gameCfg.startMinute).padStart(2, "0");
+      el.countdownBanner.textContent = `Nächstes ${gameCfg.label}: ${dayText} ${hh}:${mm} (Berlin) · in ${countdown}`;
     }
 
     function getISOWeek(date) {
@@ -859,7 +965,7 @@
       });
     }
 
-    function buildData(playerRows, tournamentRows, targetYear) {
+    function buildData(playerRows, tournamentRows, targetYear, targetGame) {
       const now = new Date();
       const currentWeek = getISOWeek(now);
       const currentYear = now.getFullYear();
@@ -873,10 +979,12 @@
           const id = row.turnier_id || row.turnierId || `T${String(idx + 1).padStart(3, "0")}`;
           const date = row.datum || row.date || "";
           const year = parseTournamentYear(row, currentYear);
+          const game = normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d");
           const cells = normalizedCells(row);
-          return { id, date, week, year, row, cells };
+          return { id, date, week, year, game, row, cells };
         })
         .filter((t) => {
+          if (t.game !== targetGame) return false;
           if (t.week === null || t.year !== targetYear) return false;
           if (targetYear === currentYear) return t.week <= currentWeek;
           return true;
@@ -934,6 +1042,18 @@
       return { players, weekColumns, currentWeek, currentYear };
     }
 
+    function yearsForGame(gameKey) {
+      const nowYear = new Date().getFullYear();
+      return Array.from(
+        new Set(
+          state.allTournamentRows
+            .filter((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d") === gameKey)
+            .map((row) => parseTournamentYear(row, nowYear))
+            .filter(Boolean)
+        )
+      ).sort((a, b) => a - b);
+    }
+
     function populateYearSelect() {
       el.yearSelect.innerHTML = "";
       state.availableYears
@@ -950,10 +1070,11 @@
     }
 
     function applyYear(year) {
-      const { players, weekColumns, currentWeek, currentYear } = buildData(state.allPlayerRows, state.allTournamentRows, year);
+      const { players, weekColumns, currentWeek, currentYear } = buildData(state.allPlayerRows, state.allTournamentRows, year, state.selectedGame);
       state.players = players;
       state.weekColumns = weekColumns;
       state.selectedYear = year;
+      el.yearSelect.value = String(year);
 
       if (!state.players.length || !state.weekColumns.length) {
         throw new Error(`Keine gültigen Turnierdaten für ${year} gefunden.`);
@@ -968,7 +1089,51 @@
       const lastWeek = state.weekColumns[state.weekColumns.length - 1].week;
       const yearLabel = state.weekColumns[0].year || year;
       const currentYearSuffix = year === currentYear ? ` · Aktuelle KW ${currentWeek}` : "";
-      el.meta.textContent = `${state.players.length} aktive · ${state.weekColumns.length} Turniere · ${yearLabel} KW ${firstWeek}-${lastWeek}${currentYearSuffix}`;
+      const gameLabel = GAME_CONFIG[state.selectedGame]?.label || state.selectedGame;
+      el.meta.textContent = `${gameLabel} · ${state.players.length} aktive · ${state.weekColumns.length} Turniere · ${yearLabel} KW ${firstWeek}-${lastWeek}${currentYearSuffix}`;
+    }
+
+    function clearVisuals() {
+      el.leaderboardBody.innerHTML = "";
+      clearSvg(el.positionsChart);
+      clearSvg(el.pointsChart);
+      clearSvg(el.momentumChart);
+      el.lineLegend.innerHTML = "";
+    }
+
+    function setGameUi(gameKey) {
+      const cfg = GAME_CONFIG[gameKey] || GAME_CONFIG.mk8d;
+      document.body.classList.remove("game-mk8d", "game-mkworld");
+      document.body.classList.add(cfg.bodyClass);
+      el.heroTitle.textContent = cfg.title;
+      el.gameMk8dBtn.setAttribute("aria-pressed", gameKey === "mk8d" ? "true" : "false");
+      el.gameMkworldBtn.setAttribute("aria-pressed", gameKey === "mkworld" ? "true" : "false");
+    }
+
+    function applyGameSelection(gameKey) {
+      state.selectedGame = gameKey;
+      setGameUi(gameKey);
+
+      state.availableYears = yearsForGame(gameKey);
+      populateYearSelect();
+
+      if (!state.availableYears.length) {
+        clearVisuals();
+        showError(`Keine Turnierdaten für ${GAME_CONFIG[gameKey]?.label || gameKey} vorhanden.`);
+        el.meta.textContent = "Keine Daten";
+        updateTournamentCountdown();
+        return;
+      }
+
+      el.error.hidden = true;
+      state.selectedYear = state.availableYears.includes(state.selectedYear)
+        ? state.selectedYear
+        : state.availableYears[state.availableYears.length - 1];
+
+      applyYear(state.selectedYear);
+      render();
+      enrichAvatars();
+      updateTournamentCountdown();
     }
 
     function cumulativeAt(player, weekIndex) {
@@ -1027,7 +1192,13 @@
           <td class="rank">${p.rank}</td>
           <td>
             <div class="player">
-              <img class="avatar" src="${p.avatar || FALLBACK_AVATAR}" alt="${p.name}" loading="lazy" />
+              <img
+                class="avatar"
+                src="${p.avatar || FALLBACK_AVATAR}"
+                alt="${p.name}"
+                loading="lazy"
+                style="border-color:${p.color}; box-shadow:0 0 0 2px ${p.color};"
+              />
               <div>
                 <div>${displayName(p)}</div>
                 <small class="player-meta">${p.name}</small>
@@ -1155,17 +1326,23 @@
 
       const width = 520;
       const height = 360;
-      const m = { top: 12, right: 12, bottom: 28, left: 180 };
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+      const m = isMobile
+        ? { top: 12, right: 10, bottom: 24, left: 132 }
+        : { top: 12, right: 12, bottom: 28, left: 180 };
       const iw = width - m.left - m.right;
       const rowH = (height - m.top - m.bottom) / top.length;
       const max = Math.max(1, ...top.map((p) => p.pointsTotal));
+      const labelSize = isMobile ? 11 : 12;
 
       top.forEach((p, i) => {
         const y = m.top + i * rowH + 4;
         const w = (p.pointsTotal / max) * iw;
+        const valueX = Math.min(m.left + w + 6, width - 8);
+        const valueAnchor = valueX >= width - 8 ? "end" : "start";
         svg.appendChild(svgNode("rect", { x: m.left, y, width: w, height: rowH - 8, rx: 5, fill: p.color, opacity: 0.9 }));
-        svg.appendChild(svgNode("text", { x: m.left - 8, y: y + (rowH - 8) / 2 + 4, "font-size": 12, "text-anchor": "end", fill: "#364c94" })).textContent = `${p.rank}. ${displayName(p)}`;
-        svg.appendChild(svgNode("text", { x: m.left + w + 6, y: y + (rowH - 8) / 2 + 4, "font-size": 12, fill: "#364c94" })).textContent = `${p.pointsTotal}`;
+        svg.appendChild(svgNode("text", { x: m.left - 6, y: y + (rowH - 8) / 2 + 4, "font-size": labelSize, "text-anchor": "end", fill: "#364c94" })).textContent = `${p.rank}. ${displayName(p)}`;
+        svg.appendChild(svgNode("text", { x: valueX, y: y + (rowH - 8) / 2 + 4, "font-size": labelSize, "text-anchor": valueAnchor, fill: "#364c94" })).textContent = `${p.pointsTotal}`;
       });
     }
 
@@ -1183,18 +1360,24 @@
 
       const width = 520;
       const height = 360;
-      const m = { top: 12, right: 12, bottom: 28, left: 180 };
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+      const m = isMobile
+        ? { top: 12, right: 10, bottom: 24, left: 132 }
+        : { top: 12, right: 12, bottom: 28, left: 180 };
       const iw = width - m.left - m.right;
       const rowH = (height - m.top - m.bottom) / top.length;
       const max = Math.max(1, ...top.map((p) => p.recent));
+      const labelSize = isMobile ? 11 : 12;
 
       top.forEach((p, i) => {
         const y = m.top + i * rowH + 4;
         const w = (p.recent / max) * iw;
         const fill = i % 2 === 0 ? "#2f57ff" : "#8c4dff";
+        const valueX = Math.min(m.left + w + 6, width - 8);
+        const valueAnchor = valueX >= width - 8 ? "end" : "start";
         svg.appendChild(svgNode("rect", { x: m.left, y, width: w, height: rowH - 8, rx: 5, fill, opacity: 0.88 }));
-        svg.appendChild(svgNode("text", { x: m.left - 8, y: y + (rowH - 8) / 2 + 4, "font-size": 12, "text-anchor": "end", fill: "#364c94" })).textContent = displayName(p);
-        svg.appendChild(svgNode("text", { x: m.left + w + 6, y: y + (rowH - 8) / 2 + 4, "font-size": 12, fill: "#364c94" })).textContent = `${p.recent}`;
+        svg.appendChild(svgNode("text", { x: m.left - 6, y: y + (rowH - 8) / 2 + 4, "font-size": labelSize, "text-anchor": "end", fill: "#364c94" })).textContent = displayName(p);
+        svg.appendChild(svgNode("text", { x: valueX, y: y + (rowH - 8) / 2 + 4, "font-size": labelSize, "text-anchor": valueAnchor, fill: "#364c94" })).textContent = `${p.recent}`;
       });
     }
 
@@ -1243,17 +1426,6 @@
         state.allPlayerRows = playerRows;
         state.allTournamentRows = tournamentRows;
 
-        const nowYear = new Date().getFullYear();
-        const years = Array.from(
-          new Set(tournamentRows.map((row) => parseTournamentYear(row, nowYear)).filter(Boolean))
-        ).sort((a, b) => a - b);
-        if (!years.length) throw new Error("Keine gültigen Jahre in turniere.csv gefunden.");
-
-        state.availableYears = years;
-        state.selectedYear = years.includes(nowYear) ? nowYear : years[years.length - 1];
-        populateYearSelect();
-        applyYear(state.selectedYear);
-
         el.slider.addEventListener("input", () => {
           state.selectedWeekIndex = Number(el.slider.value);
           render();
@@ -1267,9 +1439,16 @@
           enrichAvatars();
         });
 
-        render();
-        enrichAvatars();
-        updateTournamentCountdown();
+        el.gameMk8dBtn.addEventListener("click", () => applyGameSelection("mk8d"));
+        el.gameMkworldBtn.addEventListener("click", () => applyGameSelection("mkworld"));
+
+        const detectedGames = Array.from(
+          new Set(tournamentRows.map((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d")))
+        );
+        state.availableGames = detectedGames;
+        state.selectedGame = detectedGames.includes("mk8d") ? "mk8d" : (detectedGames[0] || "mk8d");
+        applyGameSelection(state.selectedGame);
+
         setInterval(updateTournamentCountdown, 1000);
       } catch (err) {
         showError(err instanceof Error ? err.message : "Unbekannter Fehler beim Laden der Daten.");
