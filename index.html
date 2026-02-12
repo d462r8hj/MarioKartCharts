@@ -264,9 +264,9 @@
 
     .num { text-align: right; font-variant-numeric: tabular-nums; }
     .rank { font-weight: 800; color: #132b96; }
-    .delta-up { color: #2f57ff; font-weight: 800; }
-    .delta-down { color: #8c4dff; font-weight: 800; }
-    .delta-flat { color: #707694; font-weight: 800; }
+    .delta-up { color: #1d9f55; font-weight: 800; }
+    .delta-down { color: #cf3b3b; font-weight: 800; }
+    .delta-flat { color: #b08c00; font-weight: 800; }
 
     .player {
       display: flex;
@@ -368,14 +368,89 @@
 
     body.game-mkworld {
       background:
-        radial-gradient(circle at 10% 15%, rgba(0, 196, 167, 0.28), transparent 28%),
-        radial-gradient(circle at 88% 8%, rgba(0, 120, 255, 0.24), transparent 28%),
-        radial-gradient(circle at 78% 90%, rgba(98, 228, 255, 0.2), transparent 30%),
-        linear-gradient(160deg, #03131a, #0b2e41);
+        radial-gradient(circle at 12% 10%, rgba(0, 240, 214, 0.26), transparent 26%),
+        radial-gradient(circle at 88% 12%, rgba(45, 150, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 72% 86%, rgba(125, 232, 255, 0.2), transparent 32%),
+        linear-gradient(155deg, #02141f, #0a3554 55%, #0a2a40);
     }
 
     body.game-mkworld .hero {
-      background: linear-gradient(120deg, rgba(0, 196, 167, 0.9), rgba(0, 120, 255, 0.92) 42%, rgba(98, 228, 255, 0.9));
+      border-radius: 24px;
+      border: 1px solid rgba(173, 246, 255, 0.55);
+      background:
+        linear-gradient(110deg, rgba(0, 167, 209, 0.9), rgba(26, 97, 255, 0.9) 48%, rgba(84, 226, 255, 0.85)),
+        radial-gradient(circle at 84% -15%, rgba(255, 255, 255, 0.45), transparent 48%);
+      box-shadow: 0 18px 46px rgba(2, 13, 29, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+    }
+
+    body.game-mkworld .hero::before {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+      animation-duration: 5.4s;
+    }
+
+    body.game-mkworld .hero h1 {
+      letter-spacing: 0.8px;
+      text-shadow: 0 5px 14px rgba(0, 18, 38, 0.45);
+    }
+
+    body.game-mkworld .countdown {
+      background: rgba(2, 35, 71, 0.44);
+      border-color: rgba(186, 248, 255, 0.72);
+    }
+
+    body.game-mkworld .game-switch {
+      background: rgba(6, 35, 72, 0.34);
+      border-color: rgba(162, 238, 255, 0.58);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+    }
+
+    body.game-mkworld .game-btn {
+      padding: 8px 13px;
+      letter-spacing: 0.45px;
+      font-weight: 800;
+    }
+
+    body.game-mkworld .game-btn[aria-pressed="true"] {
+      background: linear-gradient(120deg, rgba(116, 244, 255, 0.34), rgba(71, 155, 255, 0.44));
+      text-shadow: 0 0 8px rgba(177, 250, 255, 0.55);
+    }
+
+    body.game-mkworld .card {
+      border-radius: 18px;
+      border: 1px solid rgba(161, 241, 255, 0.46);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.93), rgba(236, 249, 255, 0.9));
+      backdrop-filter: blur(9px);
+      box-shadow: 0 15px 38px rgba(1, 16, 34, 0.34);
+    }
+
+    body.game-mkworld .section-head {
+      background: linear-gradient(90deg, rgba(9, 74, 133, 0.9), rgba(9, 119, 180, 0.88));
+      border-bottom-color: rgba(164, 240, 255, 0.48);
+      color: #e9fbff;
+    }
+
+    body.game-mkworld .section-head h2 {
+      color: #f4feff;
+      text-shadow: 0 2px 8px rgba(0, 24, 46, 0.35);
+    }
+
+    body.game-mkworld .section-head .meta {
+      color: #d8f6ff;
+    }
+
+    body.game-mkworld .controls {
+      background: linear-gradient(132deg, rgba(34, 137, 221, 0.13), rgba(0, 200, 180, 0.15));
+      border-bottom-color: rgba(140, 225, 246, 0.45);
+    }
+
+    body.game-mkworld .controls label {
+      color: #0f5d88;
+    }
+
+    body.game-mkworld .select-row select {
+      border-color: rgba(87, 191, 236, 0.75);
+      color: #0d5278;
+      background: linear-gradient(180deg, #ffffff, #ebfaff);
     }
 
     body.game-mkworld .controls {
@@ -387,13 +462,29 @@
     }
 
     body.game-mkworld thead th {
-      background: #0078ff;
-      border-bottom-color: #0063d2;
+      background: linear-gradient(90deg, #0d79d1, #2a9fe3);
+      border-bottom-color: #0a6dc2;
+      text-shadow: 0 2px 8px rgba(0, 32, 61, 0.35);
     }
 
     body.game-mkworld .rank { color: #0063d2; }
-    body.game-mkworld .delta-up { color: #00a98f; }
-    body.game-mkworld .delta-down { color: #0078ff; }
+    body.game-mkworld .delta-up { color: #1d9f55; }
+    body.game-mkworld .delta-down { color: #cf3b3b; }
+    body.game-mkworld .delta-flat { color: #b08c00; }
+
+    body.game-mkworld tbody tr:nth-child(odd) { background: #f2faff; }
+    body.game-mkworld tbody tr:hover { background: #e4f5ff; }
+
+    body.game-mkworld .chart-card {
+      border-color: rgba(117, 205, 239, 0.5);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(240, 252, 255, 0.9)),
+        repeating-linear-gradient(45deg, rgba(44, 138, 198, 0.03), rgba(44, 138, 198, 0.03) 7px, transparent 7px, transparent 14px);
+    }
+
+    body.game-mkworld .chart-card h3 { color: #0f5d88; }
+    body.game-mkworld .legend { color: #126087; }
+    body.game-mkworld .legend-dot { box-shadow: 0 0 0 1px rgba(13, 81, 121, 0.22); }
 
     @media (min-width: 860px) {
       .content-grid {
