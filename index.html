@@ -233,14 +233,14 @@
     }
 
     .season-switch {
-      display: grid;
-      grid-auto-flow: column;
-      gap: 10px;
+      display: flex;
+      flex-direction: row;
       align-items: center;
       overflow-x: auto;
       overflow-y: hidden;
       padding: 4px 0;
       scroll-behavior: smooth;
+      gap: 16px;
     }
 
     .season-switch::-webkit-scrollbar {
@@ -282,6 +282,7 @@
       line-height: 1.2;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .season-btn img {
@@ -317,11 +318,10 @@
     }
 
     .season-btn[aria-pressed="true"] {
-      background: linear-gradient(135deg, #8c4dff, #6a39ff);
+      background: linear-gradient(120deg, var(--blue-1), var(--violet-1));
       color: #fff;
-      border-color: #6a39ff;
+      border-color: var(--violet-1);
       transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(140, 77, 255, 0.5);
     }
 
     .season-btn[aria-pressed="true"] img {
@@ -1389,6 +1389,7 @@
         button.addEventListener("click", () => {
           if (season.key === state.selectedSeasonKey) return;
           applySeason(season.key);
+          populateSeasonButtons();
           render();
           enrichAvatars();
         });
@@ -1468,6 +1469,7 @@
       }
 
       applySeason(state.selectedSeasonKey);
+      populateSeasonButtons();
       render();
       enrichAvatars();
       updateTournamentCountdown();
