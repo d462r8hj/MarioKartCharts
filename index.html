@@ -220,6 +220,91 @@
       color: #24326f;
     }
 
+    .season-switch {
+      display: grid;
+      grid-auto-flow: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .season-btn {
+      appearance: none;
+      border: 1px solid #bbc8ff;
+      border-radius: 18px;
+      background: #fff;
+      color: #24326f;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 4px;
+      width: 64px;
+      aspect-ratio: 1 / 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      white-space: normal;
+      line-height: 1.2;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .season-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .season-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      line-height: 1;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .season-badge.current {
+      background: #c8102e;
+      color: #fff;
+    }
+
+    .season-badge.past {
+      background: #d1d5db;
+      color: #111;
+    }
+
+    .season-btn[aria-pressed="true"] {
+      background: linear-gradient(135deg, rgba(47, 87, 255, 0.98), rgba(140, 77, 255, 0.98));
+      color: #fff;
+      border-color: rgba(47, 87, 255, 0.9);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(47, 87, 255, 0.3);
+    }
+
+    .season-btn[aria-pressed="true"] img {
+      opacity: 0.85;
+    }
+
+    .season-btn:hover {
+      border-color: #8c4dff;
+    }
+
+    @media (max-width: 560px) {
+      .season-switch {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+      }
+    }
+
     input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--blue-2); }
 
     .pill {
@@ -597,10 +682,8 @@
         </div>
         <div class="controls">
           <div class="select-row">
-            <label for="yearSelect">Jahr</label>
-            <select id="yearSelect" disabled>
-              <option>2026</option>
-            </select>
+            <label>Saison</label>
+            <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
           </div>
           <label for="weekSlider">Woche auswählen</label>
           <div class="slider-row">
@@ -715,8 +798,9 @@
     const state = {
       allPlayerRows: [],
       allTournamentRows: [],
-      availableYears: [],
-      selectedYear: null,
+      availableSeasons: [],
+      selectedSeasonKey: null,
+      selectedSeasonLabel: "",
       selectedGame: "mk8d",
       availableGames: [],
       players: [],
@@ -728,7 +812,7 @@
 
     const el = {
       slider: document.getElementById("weekSlider"),
-      yearSelect: document.getElementById("yearSelect"),
+      seasonSwitch: document.getElementById("seasonSwitch"),
       weekLabel: document.getElementById("weekLabel"),
       leaderboardBody: document.getElementById("leaderboardBody"),
       meta: document.getElementById("dataMeta"),
@@ -828,6 +912,68 @@
       const d = Number(m[3]);
       if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
       return getISOWeek(new Date(y, mo - 1, d));
+    }
+
+    function parseIsoDateParts(dateValue) {
+      const text = String(dateValue || "").trim();
+      const m = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return null;
+      const y = Number(m[1]);
+      const mo = Number(m[2]);
+      const d = Number(m[3]);
+      if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+      return { year: y, month: mo, day: d };
+    }
+
+    function getLastSundayOfMarch(year) {
+      const date = new Date(Date.UTC(year, 2, 31));
+      const dow = date.getUTCDay();
+      const offset = dow === 0 ? 0 : dow;
+      date.setUTCDate(date.getUTCDate() - offset);
+      return date;
+    }
+
+    function seasonBoundaryTimestamp(year) {
+      const boundary = getLastSundayOfMarch(year);
+      return Date.UTC(boundary.getUTCFullYear(), boundary.getUTCMonth(), boundary.getUTCDate());
+    }
+
+    function seasonKeyFromDate(dateValue) {
+      const parts = parseIsoDateParts(dateValue);
+      if (!parts) return null;
+      const utcTs = Date.UTC(parts.year, parts.month - 1, parts.day);
+      const boundary = seasonBoundaryTimestamp(parts.year);
+      if (utcTs >= boundary) {
+        return `summer-${parts.year}`;
+      }
+      return `winter-${parts.year - 1}-${parts.year}`;
+    }
+
+    function seasonLabelFromKey(key) {
+      const summer = /^summer-(\d{4})$/.exec(key);
+      if (summer) return `Sommersaison ${summer[1]}`;
+      const winter = /^winter-(\d{4})-(\d{4})$/.exec(key);
+      if (winter) return `Wintersaison ${winter[1]}/${winter[2]}`;
+      return String(key);
+    }
+
+    function seasonButtonLabelFromKey(key) {
+      const summer = /^summer-(\d{4})$/.exec(key);
+      if (summer) return `SS ${summer[1].slice(-2)}`;
+      const winter = /^winter-(\d{4})-(\d{4})$/.exec(key);
+      if (winter) return `WS ${winter[1].slice(-2)}/${winter[2].slice(-2)}`;
+      return String(key);
+    }
+
+    function seasonStartTimestamp(key) {
+      const summer = /^summer-(\d{4})$/.exec(key);
+      if (summer) return seasonBoundaryTimestamp(Number(summer[1]));
+      const winter = /^winter-(\d{4})-(\d{4})$/.exec(key);
+      if (winter) {
+        const year = Number(winter[2]);
+        return Date.UTC(year, 0, 1);
+      }
+      return 0;
     }
 
     function parseYear(value) {
@@ -1062,7 +1208,7 @@
       });
     }
 
-    function buildData(playerRows, tournamentRows, targetYear, targetGame) {
+    function buildData(playerRows, tournamentRows, targetSeasonKey, targetGame) {
       const now = new Date();
       const currentWeek = getISOWeek(now);
       const currentYear = now.getFullYear();
@@ -1076,14 +1222,14 @@
           const date = row.datum || row.date || "";
           const week = parseIsoWeekFromDate(date) ?? parseKw(row.kw || row.KW || row.woche || row.Woche);
           const year = parseTournamentYear(row, currentYear);
+          const seasonKey = seasonKeyFromDate(date) || `summer-${year}`;
           const game = normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d");
           const cells = normalizedCells(row);
-          return { id, date, week, year, game, row, cells };
+          return { id, date, week, year, seasonKey, game, row, cells };
         })
         .filter((t) => {
           if (t.game !== targetGame) return false;
-          if (t.week === null || t.year !== targetYear) return false;
-          if (targetYear === currentYear) return t.week <= currentWeek;
+          if (t.week === null || t.seasonKey !== targetSeasonKey) return false;
           return true;
         })
         .sort((a, b) => a.week - b.week || String(a.date).localeCompare(String(b.date)));
@@ -1140,42 +1286,93 @@
       return { players, weekColumns, currentWeek, currentYear };
     }
 
-    function yearsForGame(gameKey) {
-      const nowYear = new Date().getFullYear();
-      return Array.from(
-        new Set(
-          state.allTournamentRows
-            .filter((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d") === gameKey)
-            .map((row) => parseTournamentYear(row, nowYear))
-            .filter(Boolean)
-        )
-      ).sort((a, b) => a - b);
+    function seasonIconFromKey(key) {
+      if (/^summer-\d{4}$/.test(key)) {
+        return "https://static.wikia.nocookie.net/mario-kart/images/5/5c/MK8_Sprite_Blatt-Reifen.png/revision/latest/scale-to-width-down/80?cb=20151219191703&path-prefix=de";
+      }
+      if (/^winter-\d{4}-\d{4}$/.test(key)) {
+        return "https://static.wikia.nocookie.net/mario-kart/images/7/7f/MK8_Sprite_Standard-Reifen_%28Blau%29.png/revision/latest?cb=20150206123154&path-prefix=de";
+      }
+      return "";
     }
 
-    function populateYearSelect() {
-      el.yearSelect.innerHTML = "";
-      state.availableYears
-        .slice()
-        .sort((a, b) => b - a)
-        .forEach((year) => {
-          const option = document.createElement("option");
-          option.value = String(year);
-          option.textContent = String(year);
-          if (year === state.selectedYear) option.selected = true;
-          el.yearSelect.appendChild(option);
+    function seasonBadgeText(key) {
+      const summer = /^summer-(\d{4})$/.exec(key);
+      if (summer) return summer[1].slice(-2);
+      const winter = /^winter-(\d{4})-(\d{4})$/.exec(key);
+      if (winter) return winter[1].slice(-2);
+      return "";
+    }
+
+    function currentSeasonKey() {
+      const today = new Date();
+      return seasonKeyFromDate(today.toISOString().slice(0, 10));
+    }
+
+    function seasonsForGame(gameKey) {
+      const seasonMap = new Map();
+      state.allTournamentRows
+        .filter((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d") === gameKey)
+        .forEach((row) => {
+          const date = row.datum || row.date || "";
+          const key = seasonKeyFromDate(date);
+          if (!key) return;
+          if (!seasonMap.has(key)) {
+            seasonMap.set(key, {
+              key,
+              label: seasonLabelFromKey(key),
+              icon: seasonIconFromKey(key),
+              startTimestamp: seasonStartTimestamp(key)
+            });
+          }
         });
-      el.yearSelect.disabled = state.availableYears.length <= 1;
+      return Array.from(seasonMap.values()).sort((a, b) => a.startTimestamp - b.startTimestamp);
     }
 
-    function applyYear(year) {
-      const { players, weekColumns, currentWeek, currentYear } = buildData(state.allPlayerRows, state.allTournamentRows, year, state.selectedGame);
+    function populateSeasonButtons() {
+      el.seasonSwitch.innerHTML = "";
+      const currentKey = currentSeasonKey();
+      state.availableSeasons.forEach((season) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "season-btn";
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-pressed", season.key === state.selectedSeasonKey ? "true" : "false");
+        button.title = season.label;
+
+        if (season.icon) {
+          const img = document.createElement("img");
+          img.src = season.icon;
+          img.alt = season.label;
+          button.appendChild(img);
+        } else {
+          button.textContent = season.label;
+        }
+
+        const badge = document.createElement("span");
+        badge.className = `season-badge ${season.key === currentKey ? "current" : "past"}`;
+        badge.textContent = seasonBadgeText(season.key);
+        button.appendChild(badge);
+
+        button.addEventListener("click", () => {
+          if (season.key === state.selectedSeasonKey) return;
+          applySeason(season.key);
+          render();
+          enrichAvatars();
+        });
+        el.seasonSwitch.appendChild(button);
+      });
+    }
+
+    function applySeason(seasonKey) {
+      const { players, weekColumns } = buildData(state.allPlayerRows, state.allTournamentRows, seasonKey, state.selectedGame);
       state.players = players;
       state.weekColumns = weekColumns;
-      state.selectedYear = year;
-      el.yearSelect.value = String(year);
+      state.selectedSeasonKey = seasonKey;
+      state.selectedSeasonLabel = state.availableSeasons.find((season) => season.key === seasonKey)?.label || seasonKey;
 
       if (!state.players.length || !state.weekColumns.length) {
-        throw new Error(`Keine gültigen Turnierdaten für ${year} gefunden.`);
+        throw new Error(`Keine gültigen Turnierdaten für ${state.selectedSeasonLabel} gefunden.`);
       }
 
       state.selectedWeekIndex = state.weekColumns.length - 1;
@@ -1185,10 +1382,10 @@
 
       const firstWeek = state.weekColumns[0].week;
       const lastWeek = state.weekColumns[state.weekColumns.length - 1].week;
-      const yearLabel = state.weekColumns[0].year || year;
-      const currentYearSuffix = year === currentYear ? ` · Aktuelle KW ${currentWeek}` : "";
+      const currentWeek = getISOWeek(new Date());
+      const currentYearSuffix = state.weekColumns[0].year === new Date().getFullYear() ? ` · Aktuelle KW ${currentWeek}` : "";
       const gameLabel = GAME_CONFIG[state.selectedGame]?.label || state.selectedGame;
-      el.meta.textContent = `${gameLabel} · ${state.players.length} aktive · ${state.weekColumns.length} Turniere · ${yearLabel} KW ${firstWeek}-${lastWeek}${currentYearSuffix}`;
+      el.meta.textContent = `${gameLabel} · ${state.players.length} aktive · ${state.weekColumns.length} Turniere · ${state.selectedSeasonLabel} KW ${firstWeek}-${lastWeek}${currentYearSuffix}`;
     }
 
     function clearVisuals() {
@@ -1212,10 +1409,10 @@
       state.selectedGame = gameKey;
       setGameUi(gameKey);
 
-      state.availableYears = yearsForGame(gameKey);
-      populateYearSelect();
+      state.availableSeasons = seasonsForGame(gameKey);
+      populateSeasonButtons();
 
-      if (!state.availableYears.length) {
+      if (!state.availableSeasons.length) {
         clearVisuals();
         showError(`Keine Turnierdaten für ${GAME_CONFIG[gameKey]?.label || gameKey} vorhanden.`);
         el.meta.textContent = "Keine Daten";
@@ -1224,11 +1421,11 @@
       }
 
       el.error.hidden = true;
-      state.selectedYear = state.availableYears.includes(state.selectedYear)
-        ? state.selectedYear
-        : state.availableYears[state.availableYears.length - 1];
+      state.selectedSeasonKey = state.availableSeasons.some((season) => season.key === state.selectedSeasonKey)
+        ? state.selectedSeasonKey
+        : state.availableSeasons[state.availableSeasons.length - 1].key;
 
-      applyYear(state.selectedYear);
+      applySeason(state.selectedSeasonKey);
       render();
       enrichAvatars();
       updateTournamentCountdown();
@@ -1483,7 +1680,7 @@
       if (!state.players.length || !state.weekColumns.length) return;
       const weekData = state.weekColumns[state.selectedWeekIndex];
       const weekNo = weekData?.week ?? 1;
-      el.weekLabel.textContent = `${state.selectedYear} · W${weekNo}`;
+      el.weekLabel.textContent = `${state.selectedSeasonLabel} · W${weekNo}`;
       renderTable();
       renderPositionsChart();
       renderPointsChart();
@@ -1527,14 +1724,6 @@
         el.slider.addEventListener("input", () => {
           state.selectedWeekIndex = Number(el.slider.value);
           render();
-        });
-
-        el.yearSelect.addEventListener("change", () => {
-          const selected = Number(el.yearSelect.value);
-          if (!Number.isFinite(selected)) return;
-          applyYear(selected);
-          render();
-          enrichAvatars();
         });
 
         el.gameMk8dBtn.addEventListener("click", () => applyGameSelection("mk8d"));
