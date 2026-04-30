@@ -220,11 +220,45 @@
       color: #24326f;
     }
 
+    .season-controls {
+      display: grid;
+      gap: 8px;
+    }
+
+    .season-controls-label {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: #253061;
+    }
+
     .season-switch {
       display: grid;
       grid-auto-flow: column;
       gap: 10px;
       align-items: center;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 4px 0;
+      scroll-behavior: smooth;
+    }
+
+    .season-switch::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .season-switch::-webkit-scrollbar-track {
+      background: #f0f2ff;
+      border-radius: 3px;
+    }
+
+    .season-switch::-webkit-scrollbar-thumb {
+      background: #8c4dff;
+      border-radius: 3px;
+    }
+
+    .season-switch::-webkit-scrollbar-thumb:hover {
+      background: #6a39ff;
     }
 
     .season-btn {
@@ -283,11 +317,11 @@
     }
 
     .season-btn[aria-pressed="true"] {
-      background: linear-gradient(135deg, rgba(47, 87, 255, 0.98), rgba(140, 77, 255, 0.98));
+      background: linear-gradient(135deg, #8c4dff, #6a39ff);
       color: #fff;
-      border-color: rgba(47, 87, 255, 0.9);
+      border-color: #6a39ff;
       transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(47, 87, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(140, 77, 255, 0.5);
     }
 
     .season-btn[aria-pressed="true"] img {
@@ -681,10 +715,8 @@
           <div class="meta" id="dataMeta">Lade Daten...</div>
         </div>
         <div class="controls">
-          <div class="select-row">
-            <label>Saison</label>
-            <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
-          </div>
+          <label class="season-controls-label">Saison</label>
+          <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
           <label for="weekSlider">Woche auswählen</label>
           <div class="slider-row">
             <input id="weekSlider" type="range" min="0" max="0" value="0" />
@@ -1421,9 +1453,19 @@
       }
 
       el.error.hidden = true;
-      state.selectedSeasonKey = state.availableSeasons.some((season) => season.key === state.selectedSeasonKey)
-        ? state.selectedSeasonKey
-        : state.availableSeasons[state.availableSeasons.length - 1].key;
+      
+      // Try to select the current season, otherwise fall back to the latest available
+      const currentSeason = currentSeasonKey();
+      const currentSeasonAvailable = state.availableSeasons.some((season) => season.key === currentSeason);
+      
+      if (currentSeasonAvailable && !state.selectedSeasonKey) {
+        state.selectedSeasonKey = currentSeason;
+      } else if (state.availableSeasons.some((season) => season.key === state.selectedSeasonKey)) {
+        // Keep current selection if it's still available
+      } else {
+        // Fall back to the latest available season
+        state.selectedSeasonKey = state.availableSeasons[state.availableSeasons.length - 1].key;
+      }
 
       applySeason(state.selectedSeasonKey);
       render();
