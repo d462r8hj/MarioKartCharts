@@ -117,6 +117,19 @@
       letter-spacing: 0.2px;
     }
 
+    .countdown-container {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .countdown-container .countdown {
+      margin-top: 0;
+      flex: 0 1 auto;
+    }
+
     .hero-top {
       display: flex;
       align-items: center;
@@ -539,6 +552,10 @@
       border-color: rgba(186, 248, 255, 0.72);
     }
 
+    body.game-mkworld .countdown-container {
+      gap: 12px;
+    }
+
     body.game-mkworld .game-switch {
       background: rgba(6, 35, 72, 0.34);
       border-color: rgba(162, 238, 255, 0.58);
@@ -683,6 +700,7 @@
       .hero h1 { font-size: 1.15rem; }
       .game-btn { font-size: 0.75rem; padding: 6px 8px; }
       .countdown { font-size: 0.76rem; padding: 6px 8px; }
+      .countdown-container { gap: 6px; }
       .section-head { padding: 10px 12px; }
       .section-head h2 { font-size: 0.9rem; }
       .meta { font-size: 0.77rem; }
@@ -727,7 +745,11 @@
           <button id="gameMkworldBtn" class="game-btn" type="button" aria-pressed="false">Mario Kart World</button>
         </div>
       </div>
-      <div id="countdownBanner" class="countdown">Nächstes Turnier wird berechnet...</div>
+      <div class="countdown-container">
+        <div id="countdownBanner" class="countdown">Nächstes Turnier wird berechnet...</div>
+        <div id="seasonEndBanner" class="countdown">Saisonende wird berechnet...</div>
+        <div id="remainingTournamentsBanner" class="countdown">Verbl. Turniertage wird berechnet...</div>
+      </div>
     </section>
 
     <div class="content-grid">
@@ -879,6 +901,8 @@
       lineTooltipImg: document.getElementById("lineTooltipImg"),
       lineTooltipName: document.getElementById("lineTooltipName"),
       countdownBanner: document.getElementById("countdownBanner"),
+      seasonEndBanner: document.getElementById("seasonEndBanner"),
+      remainingTournamentsBanner: document.getElementById("remainingTournamentsBanner"),
       heroTitle: document.getElementById("heroTitle"),
       gameMk8dBtn: document.getElementById("gameMk8dBtn"),
       gameMkworldBtn: document.getElementById("gameMkworldBtn")
@@ -1095,6 +1119,93 @@
       const seconds = total % 60;
       if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
       return `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function getSeasonEndDate(seasonKey) {
+      const match = /^q(\d)-(\d{4})$/.exec(seasonKey);
+      if (!match) return null;
+      const quarter = Number(match[1]);
+      const year = Number(match[2]);
+      const monthEnd = quarter * 3;
+      
+      // Get the last day of the quarter month
+      const date = new Date(Date.UTC(year, monthEnd, 0)); // Day 0 = last day of previous month
+      return date;
+    }
+
+    function countRemainingTournamentDays(seasonKey, gameKey) {
+      if (!seasonKey || !gameKey) return 0;
+      
+      const gameCfg = GAME_CONFIG[gameKey] || GAME_CONFIG.mk8d;
+      const targetWeekday = gameCfg.weekday; // 3 = Mittwoch, 7 = Sonntag
+      
+      const berlin = getBerlinNowParts(new Date());
+      const today = new Date(new Date().toISOString().slice(0, 10));
+      
+      const seasonEndDate = getSeasonEndDate(seasonKey);
+      if (!seasonEndDate) return 0;
+      
+      let count = 0;
+      let currentDate = new Date(today);
+      
+      // Count all occurrences of the target weekday from today until season end
+      while (currentDate <= seasonEndDate) {
+        const dayOfWeek = currentDate.getDay();
+        const isoWeekday = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert JS weekday (0-6) to ISO (1-7)
+        
+        if (isoWeekday === targetWeekday) {
+          // If it's today, only count if the tournament hasn't started yet
+          if (currentDate.getTime() === today.getTime()) {
+            const isGameDay = berlin.weekday === targetWeekday;
+            const beforeStart = berlin.hour < gameCfg.startHour || (berlin.hour === gameCfg.startHour && berlin.minute < gameCfg.startMinute);
+            if (isGameDay && beforeStart) {
+              count++;
+            }
+          } else {
+            count++;
+          }
+        }
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      return count;
+    }
+
+    function updateSeasonEndCountdown() {
+      if (!state.selectedSeasonKey) {
+        el.seasonEndBanner.textContent = "Saisonende nicht verfügbar";
+        el.remainingTournamentsBanner.textContent = "Turniertage: -";
+        return;
+      }
+
+      const now = new Date();
+      const nowMs = now.getTime();
+      
+      const seasonEndDate = getSeasonEndDate(state.selectedSeasonKey);
+      if (!seasonEndDate) {
+        el.seasonEndBanner.textContent = "Saisonende ungültig";
+        el.remainingTournamentsBanner.textContent = "Turniertage: -";
+        return;
+      }
+      
+      // Set to end of day (23:59:59) in Berlin timezone
+      const endOfDayMs = zonedDateTimeToUtcMs(
+        seasonEndDate.getUTCFullYear(),
+        seasonEndDate.getUTCMonth() + 1,
+        seasonEndDate.getUTCDate(),
+        23, 59, 59,
+        "Europe/Berlin"
+      );
+      
+      const remaining = formatDuration(endOfDayMs - nowMs);
+      const seasonLabel = seasonLabelFromKey(state.selectedSeasonKey);
+      const endDateStr = seasonEndDate.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+      el.seasonEndBanner.textContent = `Saison ${seasonLabel} endet ${endDateStr} · in ${remaining}`;
+      
+      // Update remaining tournament days
+      const remainingDays = countRemainingTournamentDays(state.selectedSeasonKey, state.selectedGame);
+      el.remainingTournamentsBanner.textContent = `${remainingDays} Turniertag${remainingDays !== 1 ? "e" : ""} verbleibend`;
     }
 
     function updateTournamentCountdown() {
@@ -1414,6 +1525,7 @@
           populateSeasonButtons();
           render();
           enrichAvatars();
+          updateSeasonEndCountdown();
         });
         el.seasonSwitch.appendChild(button);
       });
@@ -1495,6 +1607,7 @@
       render();
       enrichAvatars();
       updateTournamentCountdown();
+      updateSeasonEndCountdown();
     }
 
     function cumulativeAt(player, weekIndex) {
@@ -1812,7 +1925,13 @@
         state.selectedGame = detectedGames.includes("mk8d") ? "mk8d" : (detectedGames[0] || "mk8d");
         applyGameSelection(state.selectedGame);
 
-        setInterval(updateTournamentCountdown, 1000);
+        const updateCountdowns = () => {
+          updateTournamentCountdown();
+          updateSeasonEndCountdown();
+        };
+        
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
       } catch (err) {
         showError(err instanceof Error ? err.message : "Unbekannter Fehler beim Laden der Daten.");
         el.meta.textContent = "Fehler";
