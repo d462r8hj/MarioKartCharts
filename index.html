@@ -1547,7 +1547,9 @@
       el.leaderboardBody.innerHTML = "";
       
       // Only apply medal colors if the season is finished (not the current season)
-      const isCurrentSeason = state.selectedSeasonKey === currentSeasonKey();
+      const currentSeason = currentSeasonKey();
+      const isCurrentSeason = state.selectedSeasonKey === currentSeason;
+      console.log("Debug render: selectedSeasonKey=", state.selectedSeasonKey, "currentSeason=", currentSeason, "isCurrentSeason=", isCurrentSeason);
       
       current.forEach((p) => {
         const prevRank = prevMap.get(p.id) ?? p.rank;
