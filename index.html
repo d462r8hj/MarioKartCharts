@@ -1395,21 +1395,27 @@
         })
         .sort((a, b) => a.week - b.week || String(a.date).localeCompare(String(b.date)));
 
-      const playerBase = playerRows.map((row, idx) => {
-        const username = String(row.username || "").trim() || usernameFromName(row.name || row.spieler, `spieler_${idx + 1}`);
-        const id = normalizeKey(username);
-        const name = row.name || row.spieler || `Spieler ${idx + 1}`;
-        const aliases = String(row.alt_names || row.alias || "").split("|").map((x) => x.trim()).filter(Boolean);
-        const explicitCharacter = String(row.charakter || row.character || "").trim();
-        const character = resolveCharacter(name, aliases, explicitCharacter);
-        const meta = characterMetaFor(character);
-        const csvColor = String(row.farbe_hex || "").trim();
-        const color = csvColor || meta?.color || COLOR_POOL[idx % COLOR_POOL.length];
-        const avatarSeed = String(row.charakter_bild_url || "").trim();
-        const faceAnchor = meta?.faceAnchor || "center";
-        const scoreKeys = [];
-        return { id, name, username, aliases, character, color, avatarSeed, faceAnchor, scoreKeys };
-      });
+      const playerBase = playerRows
+        .filter((row) => {
+          // Only include active players
+          const status = String(row.status || "active").trim().toLowerCase();
+          return status === "active";
+        })
+        .map((row, idx) => {
+          const username = String(row.username || "").trim() || usernameFromName(row.name || row.spieler, `spieler_${idx + 1}`);
+          const id = normalizeKey(username);
+          const name = row.name || row.spieler || `Spieler ${idx + 1}`;
+          const aliases = String(row.alt_names || row.alias || "").split("|").map((x) => x.trim()).filter(Boolean);
+          const explicitCharacter = String(row.charakter || row.character || "").trim();
+          const character = resolveCharacter(name, aliases, explicitCharacter);
+          const meta = characterMetaFor(character);
+          const csvColor = String(row.farbe_hex || "").trim();
+          const color = csvColor || meta?.color || COLOR_POOL[idx % COLOR_POOL.length];
+          const avatarSeed = String(row.charakter_bild_url || "").trim();
+          const faceAnchor = meta?.faceAnchor || "center";
+          const scoreKeys = [];
+          return { id, name, username, aliases, character, color, avatarSeed, faceAnchor, scoreKeys };
+        });
 
       const candidateTournaments = tournaments.filter((t) => {
         return playerBase.some((p) => hasScoreEntry(t, p));
