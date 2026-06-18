@@ -369,7 +369,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      min-width: 760px;
       font-size: 0.92rem;
       background: #fff;
     }
@@ -395,9 +395,6 @@
     tbody tr:hover { background: #edf4ff; }
 
     .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .handicap-positive { color: #1d9f55; font-weight: 800; }
-    .handicap-negative { color: #cf3b3b; font-weight: 800; }
-    .handicap-neutral { color: #5f6893; font-weight: 800; }
     .rank { font-weight: 800; color: #132b96; }
     .delta-up { color: #1d9f55; font-weight: 800; }
     .delta-down { color: #cf3b3b; font-weight: 800; }
@@ -462,6 +459,180 @@
     .legend-item { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
     .legend-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
     .player-meta { color: #5f6b96; }
+
+
+
+    .handicap-positive { color: #1d9f55; font-weight: 800; }
+    .handicap-negative { color: #cf3b3b; font-weight: 800; }
+    .handicap-neutral { color: #5f6893; font-weight: 800; }
+
+    .standings-card { width: 100%; }
+    .standings-card .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 12px 14px;
+    }
+
+    .leaderboard-table {
+      min-width: 1040px;
+      table-layout: fixed;
+      font-size: 0.86rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 7px 6px;
+    }
+
+    .leaderboard-table th:nth-child(1),
+    .leaderboard-table td:nth-child(1) { width: 42px; text-align: center; }
+
+    /* bewusst sehr schmal: ca. ein Drittel der vorherigen Spieler-Spalte */
+    .leaderboard-table th:nth-child(2),
+    .leaderboard-table td:nth-child(2) { width: 70px; }
+
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) { width: 86px; }
+    .leaderboard-table th:nth-child(4),
+    .leaderboard-table td:nth-child(4) { width: 74px; }
+    .leaderboard-table th:nth-child(5),
+    .leaderboard-table td:nth-child(5) { width: 76px; }
+    .leaderboard-table th:nth-child(6),
+    .leaderboard-table td:nth-child(6) { width: 90px; }
+    .leaderboard-table th:nth-child(7),
+    .leaderboard-table td:nth-child(7) { width: 90px; }
+    .leaderboard-table th:nth-child(8),
+    .leaderboard-table td:nth-child(8) { width: 88px; }
+    .leaderboard-table th:nth-child(9),
+    .leaderboard-table td:nth-child(9) { width: 92px; }
+    .leaderboard-table th:nth-child(10),
+    .leaderboard-table td:nth-child(10) { width: 70px; }
+
+    .leaderboard-table .player {
+      gap: 5px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .leaderboard-table .avatar {
+      width: 22px;
+      height: 22px;
+      border-width: 1px;
+      box-shadow: 0 0 0 1px #1243d2;
+    }
+
+    .leaderboard-table .player > div {
+      min-width: 0;
+      max-width: 42px;
+    }
+
+    .leaderboard-table .player-name {
+      display: block;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.04;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .leaderboard-table .player-meta {
+      display: none;
+    }
+
+    .multiplier-sub,
+    .raw-rank-sub {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      line-height: 1.05;
+      white-space: normal;
+    }
+
+    @media (max-width: 859px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: auto; }
+      .leaderboard-table { min-width: 960px; font-size: 0.82rem; }
+      .standings-card .table-wrap { padding: 8px; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 20px, 620px); margin: 10px auto 18px; }
+      .hero { padding: 14px; border-radius: 16px; }
+      .hero-top { align-items: flex-start; }
+      .hero h1 { font-size: 1.35rem; line-height: 1.12; }
+      .game-switch { width: 100%; }
+      .game-btn { flex: 1; padding: 8px 6px; font-size: 0.76rem; }
+      .countdown-container { display: grid; grid-template-columns: 1fr; gap: 7px; }
+      .countdown { width: 100%; font-size: 0.75rem; white-space: normal; }
+      .section-head { align-items: flex-start; }
+      .controls { gap: 12px; }
+      .slider-row { grid-template-columns: 1fr; }
+      .pill { justify-self: start; }
+      .charts { padding: 8px; }
+      .chart-card { padding: 8px; overflow-x: auto; }
+      .chart-svg { min-width: 680px; }
+      .leaderboard-table,
+      .leaderboard-table thead,
+      .leaderboard-table tbody,
+      .leaderboard-table th,
+      .leaderboard-table td,
+      .leaderboard-table tr { display: block; }
+      .leaderboard-table { min-width: 0; width: 100%; font-size: 0.88rem; }
+      .leaderboard-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+      .leaderboard-table tbody tr {
+        margin: 0 0 10px;
+        padding: 10px;
+        border: 1px solid #dbe4ff;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 6px 16px rgba(2, 8, 26, 0.08);
+      }
+      .leaderboard-table tbody tr:nth-child(odd) { background: #fff; }
+      .leaderboard-table tbody td { border: 0; padding: 5px 0; width: auto !important; }
+      .leaderboard-table tbody td[data-label] {
+        display: grid;
+        grid-template-columns: minmax(112px, 42%) 1fr;
+        align-items: center;
+        gap: 8px;
+        text-align: right;
+      }
+      .leaderboard-table tbody td[data-label]::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        letter-spacing: 0.2px;
+      }
+      .leaderboard-table tbody td:first-child {
+        float: right;
+        width: 34px !important;
+        height: 34px;
+        border-radius: 999px;
+        background: linear-gradient(120deg, var(--blue-1), var(--violet-1));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .leaderboard-table .player { padding-right: 44px; gap: 8px; }
+      .leaderboard-table .avatar { width: 34px; height: 34px; }
+      .leaderboard-table .player > div { max-width: none; }
+      .leaderboard-table .player-name { font-size: 0.92rem; white-space: normal; overflow-wrap: anywhere; }
+      .standings-card .table-wrap { overflow-x: visible; padding: 8px 10px 12px; }
+    }
 
     /* Medal styles for top 3 */
     tbody tr.rank-1 {
@@ -738,155 +909,49 @@
     }
 
 
-    .standings-card {
-      width: 100%;
-    }
-
-    .standings-card .table-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 12px 14px;
-    }
-
+    /* Finale Tabellen-Overrides: greifen nach allen älteren Tabellenregeln. */
     .leaderboard-table {
-      min-width: 900px;
-      table-layout: fixed;
+      min-width: 1040px !important;
+      table-layout: fixed !important;
     }
-
-    .leaderboard-table th:nth-child(1),
-    .leaderboard-table td:nth-child(1) { width: 48px; text-align: center; }
     .leaderboard-table th:nth-child(2),
-    .leaderboard-table td:nth-child(2) { width: 190px; }
-    .leaderboard-table .player { gap: 8px; }
-    .leaderboard-table .player > div { min-width: 0; }
-    .leaderboard-table .player > div > div,
-    .leaderboard-table .player .player-meta {
-      display: block;
-      max-width: 130px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .leaderboard-table td:nth-child(2) {
+      width: 70px !important;
+      max-width: 70px !important;
     }
-    .leaderboard-table th:nth-child(3),
-    .leaderboard-table td:nth-child(3) { width: 120px; }
-    .leaderboard-table th:nth-child(4),
-    .leaderboard-table td:nth-child(4) { width: 130px; }
-    .leaderboard-table th:nth-child(5),
-    .leaderboard-table td:nth-child(5) { width: 120px; }
-    .leaderboard-table th:nth-child(6),
-    .leaderboard-table td:nth-child(6) { width: 120px; }
-    .leaderboard-table th:nth-child(7),
-    .leaderboard-table td:nth-child(7) { width: 120px; }
-    .leaderboard-table th:nth-child(8),
-    .leaderboard-table td:nth-child(8) { width: 90px; }
-
-    .multiplier-sub {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 0.72rem;
-      font-weight: 700;
+    .leaderboard-table .player > div {
+      max-width: 42px !important;
     }
-
-    @media (max-width: 859px) {
-      .content-grid { grid-template-columns: 1fr; }
-      .charts { grid-template-columns: 1fr; }
-      .chart-card.full { grid-column: auto; }
-      .leaderboard-table { min-width: 820px; font-size: 0.84rem; }
-      .standings-card .table-wrap { padding: 8px; }
+    .leaderboard-table .player-name {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
     }
 
     @media (max-width: 620px) {
-      .wrap { width: min(100% - 20px, 620px); margin: 10px auto 18px; }
-      .hero { padding: 14px; border-radius: 16px; }
-      .hero-top { align-items: flex-start; }
-      .hero h1 { font-size: 1.35rem; line-height: 1.12; }
-      .game-switch { width: 100%; }
-      .game-btn { flex: 1; padding: 8px 6px; font-size: 0.76rem; }
-      .countdown-container { display: grid; grid-template-columns: 1fr; gap: 7px; }
-      .countdown { width: 100%; font-size: 0.75rem; white-space: normal; }
-      .section-head { align-items: flex-start; }
-      .controls { gap: 12px; }
-      .slider-row { grid-template-columns: 1fr; }
-      .pill { justify-self: start; }
-      .charts { padding: 8px; }
-      .chart-card { padding: 8px; overflow-x: auto; }
-      .chart-svg { min-width: 680px; }
       .leaderboard-table,
       .leaderboard-table thead,
       .leaderboard-table tbody,
       .leaderboard-table th,
       .leaderboard-table td,
-      .leaderboard-table tr {
-        display: block;
-      }
-      .leaderboard-table {
-        min-width: 0;
-        width: 100%;
-        font-size: 0.88rem;
-      }
+      .leaderboard-table tr { display: block !important; }
+      .leaderboard-table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
       .leaderboard-table thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0 0 0 0) !important;
       }
-      .leaderboard-table tbody tr {
-        margin: 0 0 10px;
-        padding: 10px;
-        border: 1px solid #dbe4ff;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 6px 16px rgba(2, 8, 26, 0.08);
-      }
-      .leaderboard-table tbody tr:nth-child(odd) { background: #fff; }
-      .leaderboard-table tbody td {
-        border: 0;
-        padding: 5px 0;
-      }
+      .leaderboard-table tbody td { width: auto !important; max-width: none !important; }
       .leaderboard-table tbody td[data-label] {
-        display: grid;
-        grid-template-columns: minmax(112px, 42%) 1fr;
-        align-items: center;
-        gap: 8px;
-        text-align: right;
+        display: grid !important;
+        grid-template-columns: minmax(112px, 42%) 1fr !important;
       }
-      .leaderboard-table tbody td[data-label]::before {
-        content: attr(data-label);
-        color: var(--muted);
-        font-weight: 800;
-        text-align: left;
-        text-transform: uppercase;
-        font-size: 0.68rem;
-        letter-spacing: 0.2px;
-      }
-      .leaderboard-table tbody td:first-child {
-        float: right;
-        min-width: 34px;
-        height: 34px;
-        border-radius: 999px;
-        background: linear-gradient(120deg, var(--blue-1), var(--violet-1));
-        color: #fff;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-      }
-      .leaderboard-table .player {
-        padding-right: 44px;
-      }
-      .leaderboard-table .avatar { width: 34px; height: 34px; }
-      .leaderboard-table .player > div > div {
-        max-width: 22ch;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .standings-card .table-wrap {
-        overflow-x: visible;
-        padding: 8px 10px 12px;
-      }
+      .leaderboard-table .player > div { max-width: none !important; }
+      .leaderboard-table .player-name { font-size: 0.92rem !important; }
     }
 
   </style>
@@ -924,7 +989,6 @@
           </div>
         </div>
         <div id="error" class="error" hidden></div>
-
       </section>
 
       <section class="card">
@@ -950,11 +1014,10 @@
       </section>
     </div>
 
-
     <section class="card standings-card">
       <div class="section-head">
-        <h2>Tabelle</h2>
-        <div class="meta">Fahrpunkte, Handicap und Gesamtwertung</div>
+        <h2 id="tableTitle">Tabelle</h2>
+        <div class="meta">Fahrpunkte, Handicap und tatsächliche Rohwertung</div>
       </div>
       <div class="table-wrap">
         <table class="leaderboard-table" aria-label="Mario Kart Rangliste mit Handicap">
@@ -962,11 +1025,13 @@
             <tr>
               <th>#</th>
               <th>Spieler</th>
-              <th class="num">Fahrpunkte</th>
-              <th class="num">Multiplikator</th>
-              <th class="num">Handicap</th>
+              <th class="num">Fahrpkt.</th>
+              <th class="num">Multi</th>
+              <th class="num">HCP</th>
               <th class="num">Gewertet</th>
               <th class="num">Gesamt</th>
+              <th class="num">HCP ges.</th>
+              <th class="num">Ohne HCP</th>
               <th class="num">Trend</th>
             </tr>
           </thead>
@@ -1627,8 +1692,11 @@
         ...p,
         rawWeekScores: [],
         weekScores: [],
+        handicapReferenceRanks: [],
         handicapMultipliers: [],
         handicapPoints: [],
+        rawTotal: 0,
+        handicapTotal: 0,
         total: 0
       }));
 
@@ -1645,30 +1713,17 @@
           currentWeekRankByPlayerId.set(entry.player.id, idx + 1);
         });
 
-        const weekResults = players.map((player) => {
+        players.forEach((player) => {
           const rawScore = scoreForPlayer(tournament, player);
 
           // Woche 1 jeder Saison startet ohne Handicap.
-          // Ab Woche 2 zählt die Platzierung der aktuellen Fahrwoche (nach Rohpunkten),
-          // nicht die Gesamtplatzierung der Tabelle.
+          // Ab Woche 2 zählt die Platzierung der aktuellen Fahrwoche nach Rohpunkten.
           const referenceRank = weekIndex === 0 ? null : currentWeekRankByPlayerId.get(player.id);
           const multiplier = referenceRank ? getHandicapMultiplier(referenceRank) : 1.00;
           const adjustedScore = Math.round(rawScore * multiplier);
           const handicapScore = adjustedScore - rawScore;
 
-          return {
-            player,
-            rawScore,
-            referenceRank,
-            multiplier,
-            adjustedScore,
-            handicapScore
-          };
-        });
-
-        weekResults.forEach(({ player, rawScore, referenceRank, multiplier, adjustedScore, handicapScore }) => {
           player.rawWeekScores.push(rawScore);
-          player.handicapReferenceRanks = player.handicapReferenceRanks || [];
           player.handicapReferenceRanks.push(referenceRank || null);
           player.handicapMultipliers.push(multiplier);
           player.handicapPoints.push(handicapScore);
@@ -1677,6 +1732,8 @@
       });
 
       players.forEach((player) => {
+        player.rawTotal = player.rawWeekScores.reduce((a, b) => a + b, 0);
+        player.handicapTotal = player.handicapPoints.reduce((a, b) => a + b, 0);
         player.total = player.weekScores.reduce((a, b) => a + b, 0);
       });
 
@@ -1854,20 +1911,39 @@
       updateSeasonEndCountdown();
     }
 
-    function cumulativeAt(player, weekIndex) {
-      return player.weekScores.slice(0, weekIndex + 1).reduce((a, b) => a + b, 0);
+    function cumulativeAt(player, weekIndex, key = "weekScores") {
+      return (player[key] || []).slice(0, weekIndex + 1).reduce((a, b) => a + b, 0);
+    }
+
+    function rawRankMapByWeek(weekIndex) {
+      const rawRanked = state.players
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          rawPointsWeek: p.rawWeekScores?.[weekIndex] || 0,
+          rawPointsTotal: cumulativeAt(p, weekIndex, "rawWeekScores")
+        }))
+        .sort((a, b) => b.rawPointsTotal - a.rawPointsTotal || b.rawPointsWeek - a.rawPointsWeek || a.name.localeCompare(b.name));
+
+      const map = new Map();
+      rawRanked.forEach((p, idx) => map.set(p.id, idx + 1));
+      return map;
     }
 
     function rankByWeek(weekIndex) {
+      const rawRankMap = rawRankMapByWeek(weekIndex);
       const ranked = state.players
         .map((p) => ({
           ...p,
           rawPointsWeek: p.rawWeekScores?.[weekIndex] || 0,
+          rawPointsTotal: cumulativeAt(p, weekIndex, "rawWeekScores"),
           multiplierWeek: p.handicapMultipliers?.[weekIndex] || 1.00,
           handicapPointsWeek: p.handicapPoints?.[weekIndex] || 0,
+          handicapPointsTotal: cumulativeAt(p, weekIndex, "handicapPoints"),
           referenceRankWeek: p.handicapReferenceRanks?.[weekIndex] || null,
+          rawRank: rawRankMap.get(p.id) || null,
           pointsWeek: p.weekScores[weekIndex] || 0,
-          pointsTotal: cumulativeAt(p, weekIndex)
+          pointsTotal: cumulativeAt(p, weekIndex, "weekScores")
         }))
         .sort((a, b) => b.pointsTotal - a.pointsTotal || b.pointsWeek - a.pointsWeek || a.name.localeCompare(b.name));
       return ranked.map((p, idx) => ({ ...p, rank: idx + 1 }));
@@ -1933,10 +2009,10 @@
                 src="${p.avatar || FALLBACK_AVATAR}"
                 alt="${p.name}"
                 loading="lazy"
-                style="border-color:${p.color}; box-shadow:0 0 0 2px ${p.color}; object-position:${faceObjectPosition(p.faceAnchor)};"
+                style="border-color:${p.color}; box-shadow:0 0 0 1px ${p.color}; object-position:${faceObjectPosition(p.faceAnchor)};"
               />
               <div>
-                <div>${displayName(p)}</div>
+                <div class="player-name">${displayName(p)}</div>
                 <small class="player-meta">${p.name}</small>
               </div>
             </div>
@@ -1946,6 +2022,8 @@
           <td class="num ${handicapClass(p.handicapPointsWeek)}" data-label="Handicap">${p.handicapPointsWeek > 0 ? "+" : ""}${p.handicapPointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gewertet">${p.pointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gesamt">${p.pointsTotal.toLocaleString("de-DE")}</td>
+          <td class="num ${handicapClass(p.handicapPointsTotal)}" data-label="HCP gesamt">${p.handicapPointsTotal > 0 ? "+" : ""}${p.handicapPointsTotal.toLocaleString("de-DE")}</td>
+          <td class="num" data-label="Ohne HCP">${p.rawRank}.<small class="raw-rank-sub">${p.rawPointsTotal.toLocaleString("de-DE")} Pkt.</small></td>
           <td class="num ${trendClass(delta)}" data-label="Trend">${delta > 0 ? "+" : ""}${delta}</td>
         `;
         el.leaderboardBody.appendChild(tr);
@@ -2125,6 +2203,8 @@
       const weekData = state.weekColumns[state.selectedWeekIndex];
       const weekNo = weekData?.week ?? 1;
       el.weekLabel.textContent = `${state.selectedSeasonLabel} · W${weekNo}`;
+      const titleEl = document.getElementById("tableTitle");
+      if (titleEl) titleEl.textContent = `Tabelle – ${state.selectedSeasonLabel} · Woche ${weekNo}`;
       renderTable();
       renderPositionsChart();
       renderPointsChart();
