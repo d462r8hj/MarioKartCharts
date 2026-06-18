@@ -1283,6 +1283,166 @@
       }
     }
 
+
+    /* Letzter Feinschliff: groessere Fahrerbilder, zweiter Name sichtbar, saubere Spaltenausrichtung. */
+    .leaderboard-table {
+      width: 100%;
+      min-width: 1120px;
+      table-layout: fixed;
+      font-size: 0.94rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .leaderboard-table th {
+      text-align: right;
+    }
+
+    .leaderboard-table th:first-child,
+    .leaderboard-table td:first-child {
+      width: 48px !important;
+      min-width: 48px !important;
+      max-width: 48px !important;
+      text-align: center;
+    }
+
+    .leaderboard-table th:nth-child(2),
+    .leaderboard-table td:nth-child(2) {
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+      text-align: left;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) { width: 98px !important; }
+    .leaderboard-table th:nth-child(4),
+    .leaderboard-table td:nth-child(4) { width: 124px !important; }
+    .leaderboard-table th:nth-child(5),
+    .leaderboard-table td:nth-child(5) { width: 104px !important; }
+    .leaderboard-table th:nth-child(6),
+    .leaderboard-table td:nth-child(6) { width: 104px !important; }
+    .leaderboard-table th:nth-child(7),
+    .leaderboard-table td:nth-child(7) { width: 104px !important; }
+    .leaderboard-table th:nth-child(8),
+    .leaderboard-table td:nth-child(8) { width: 110px !important; }
+    .leaderboard-table th:nth-child(9),
+    .leaderboard-table td:nth-child(9) { width: 118px !important; }
+    .leaderboard-table th:nth-child(10),
+    .leaderboard-table td:nth-child(10) { width: 78px !important; }
+
+    .leaderboard-table td.num,
+    .leaderboard-table th.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leaderboard-table .player {
+      display: grid !important;
+      grid-template-columns: 46px minmax(0, 1fr);
+      align-items: center !important;
+      gap: 9px !important;
+      width: 100%;
+      min-width: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .leaderboard-table .player .avatar {
+      display: block !important;
+      width: 46px !important;
+      height: 46px !important;
+      min-width: 46px !important;
+      flex: 0 0 46px !important;
+      border-width: 2px !important;
+      object-fit: cover;
+    }
+
+    .leaderboard-table .player > div {
+      min-width: 0 !important;
+      width: auto !important;
+      max-width: none !important;
+      display: grid;
+      gap: 2px;
+    }
+
+    .leaderboard-table .player-name {
+      display: block;
+      width: 100%;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      font-size: 0.96rem !important;
+      letter-spacing: -0.15px;
+      line-height: 1.08;
+      font-weight: 800;
+    }
+
+    .leaderboard-table .player-meta {
+      display: block !important;
+      width: 100%;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      color: #5f6b96;
+      font-size: 0.74rem !important;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+
+    .multiplier-line {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 3px;
+      width: 100%;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 620px) {
+      .leaderboard-table {
+        min-width: 0;
+        table-layout: auto;
+        font-size: 0.95rem;
+      }
+
+      .leaderboard-table tbody td[data-label] {
+        grid-template-columns: minmax(108px, 36%) 1fr;
+      }
+
+      .leaderboard-table tbody td:nth-child(2) {
+        padding-right: 48px !important;
+      }
+
+      .leaderboard-table .player {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 10px !important;
+      }
+
+      .leaderboard-table .player .avatar {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        flex-basis: 48px !important;
+      }
+
+      .leaderboard-table .player-name {
+        font-size: 1.02rem !important;
+        letter-spacing: 0;
+        white-space: nowrap !important;
+      }
+
+      .leaderboard-table .player-meta {
+        font-size: 0.78rem !important;
+      }
+    }
+
   </style>
 </head>
 <body class="game-mk8d">
