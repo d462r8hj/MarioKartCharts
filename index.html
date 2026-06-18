@@ -3187,7 +3187,7 @@
         svg.appendChild(svgNode("text", { x: x(i), y: height - m.bottom + 18, "font-size": 12, "text-anchor": "middle", fill: "#45589f" })).textContent = `W${state.weekColumns[i].week}`;
       }
 
-      for (let r = 1; r <= Math.min(players.length, 12); r++) {
+      for (let r = 1; r <= Math.min(players.length, 20); r++) {
         svg.appendChild(svgNode("text", { x: m.left - 10, y: y(r) + 4, "font-size": 12, "text-anchor": "end", fill: "#45589f" })).textContent = String(r);
       }
 
