@@ -1589,6 +1589,7 @@
     <section class="card report-card">
       <div class="section-head">
         <h2 id="reportTitle">Wöchentlicher Spielbericht</h2>
+        <div class="meta">Automatisch aus der ausgewählten Woche generiert</div>
       </div>
       <div class="weekly-report">
         <p id="reportText" class="report-text">Spielbericht wird berechnet...</p>
@@ -2583,6 +2584,68 @@
       return `${delta > 0 ? "+" : ""}${delta}`;
     }
 
+    function formatPlayerList(players, maxNames = 3) {
+      const names = (players || []).map((p) => displayName(p));
+      if (!names.length) return "-";
+      if (names.length <= maxNames) return names.join(", ");
+      return `${names.slice(0, maxNames).join(", ")} +${names.length - maxNames}`;
+    }
+
+    function participationStats(weekIndex) {
+      const stats = state.players.map((p) => ({
+        ...p,
+        participationCount: (p.rawWeekScores || []).slice(0, weekIndex + 1).filter((score) => score > 0).length
+      }));
+      const played = stats.filter((p) => p.participationCount > 0);
+      if (!played.length) return { most: [], least: [], maxCount: 0, minCount: 0 };
+      const maxCount = Math.max(...played.map((p) => p.participationCount));
+      const minCount = Math.min(...played.map((p) => p.participationCount));
+      return {
+        most: played.filter((p) => p.participationCount === maxCount).sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name)),
+        least: played.filter((p) => p.participationCount === minCount).sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name)),
+        maxCount,
+        minCount
+      };
+    }
+
+    function calendarYearTopThree(year) {
+      const seasonKeys = Array.from(new Set(
+        state.allTournamentRows
+          .filter((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d") === state.selectedGame)
+          .filter((row) => parseTournamentYear(row, year) === year)
+          .map((row) => seasonKeyFromDate(row.datum || row.date || "") || `q1-${year}`)
+      )).sort((a, b) => seasonStartTimestamp(a) - seasonStartTimestamp(b));
+
+      const totals = new Map();
+      seasonKeys.forEach((seasonKey) => {
+        const data = buildData(state.allPlayerRows, state.allTournamentRows, seasonKey, state.selectedGame);
+        data.players.forEach((player) => {
+          const current = totals.get(player.id) || {
+            id: player.id,
+            name: player.name,
+            username: player.username,
+            total: 0,
+            rawTotal: 0,
+            participationCount: 0
+          };
+          current.total += player.total || 0;
+          current.rawTotal += player.rawTotal || 0;
+          current.participationCount += (player.rawWeekScores || []).filter((score) => score > 0).length;
+          totals.set(player.id, current);
+        });
+      });
+
+      return Array.from(totals.values())
+        .filter((p) => p.total > 0)
+        .sort((a, b) => b.total - a.total || b.rawTotal - a.rawTotal || a.name.localeCompare(b.name))
+        .slice(0, 3)
+        .map((p, idx) => ({ ...p, yearRank: idx + 1 }));
+    }
+
+    function playerLabel(player) {
+      return escapeHtml(displayName(player));
+    }
+
     function buildWeeklyReport(weekIndex) {
       const current = rankByWeek(weekIndex);
       const weekData = state.weekColumns[weekIndex] || {};
@@ -2604,6 +2667,9 @@
       const momentumLeader = [...current]
         .map((p) => ({ ...p, recent: p.weekScores.slice(start, weekIndex + 1).reduce((a, b) => a + b, 0) }))
         .sort((a, b) => b.recent - a.recent || a.rank - b.rank)[0];
+      const participation = participationStats(weekIndex);
+      const reportYear = weekData.year || parseYear(state.selectedSeasonKey) || new Date().getFullYear();
+      const yearTopThree = calendarYearTopThree(reportYear);
 
       let closestDuel = null;
       for (let i = 0; i < current.length - 1; i += 1) {
@@ -2666,6 +2732,31 @@
             label: "👑 Tabellenführer",
             value: leader ? displayName(leader) : "-",
             sub: leader ? `${leader.pointsTotal.toLocaleString("de-DE")} Gesamtpunkte${runnerUp ? ` · +${leaderGap.toLocaleString("de-DE")} auf P2` : ""}` : "Keine Daten"
+          },
+          {
+            label: "🎮 Meiste Teilnahmen",
+            value: formatPlayerList(participation.most),
+            sub: participation.maxCount ? `${participation.maxCount} von ${weekIndex + 1} Turnieren mitgespielt` : "Keine Daten"
+          },
+          {
+            label: "🛞 Wenigste Teilnahmen",
+            value: formatPlayerList(participation.least),
+            sub: participation.minCount ? `${participation.minCount} von ${weekIndex + 1} Turnieren mitgespielt` : "Keine Daten"
+          },
+          {
+            label: `🥇 Jahreswertung ${reportYear}`,
+            value: yearTopThree[0] ? displayName(yearTopThree[0]) : "-",
+            sub: yearTopThree[0] ? `${yearTopThree[0].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
+          },
+          {
+            label: `🥈 Jahreswertung ${reportYear}`,
+            value: yearTopThree[1] ? displayName(yearTopThree[1]) : "-",
+            sub: yearTopThree[1] ? `${yearTopThree[1].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
+          },
+          {
+            label: `🥉 Jahreswertung ${reportYear}`,
+            value: yearTopThree[2] ? displayName(yearTopThree[2]) : "-",
+            sub: yearTopThree[2] ? `${yearTopThree[2].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
           }
         ]
       };
