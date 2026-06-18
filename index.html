@@ -1443,6 +1443,79 @@
       }
     }
 
+
+
+    /* Wochenbericht */
+    .report-card {
+      width: 100%;
+    }
+
+    .weekly-report {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 14px;
+      background:
+        linear-gradient(135deg, rgba(47, 87, 255, 0.07), rgba(140, 77, 255, 0.10)),
+        #ffffff;
+    }
+
+    .report-text {
+      margin: 0;
+      color: #253061;
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .highlight-tile {
+      border: 1px solid #dbe4ff;
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: linear-gradient(180deg, #ffffff, #f7faff);
+      box-shadow: 0 6px 16px rgba(2, 8, 26, 0.06);
+      min-height: 86px;
+    }
+
+    .highlight-label {
+      color: #5f6893;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .highlight-value {
+      color: #172047;
+      font-size: 1.02rem;
+      font-weight: 900;
+      line-height: 1.18;
+    }
+
+    .highlight-sub {
+      margin-top: 4px;
+      color: #5f6b96;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    body.game-mkworld .weekly-report {
+      background:
+        linear-gradient(132deg, rgba(34, 137, 221, 0.12), rgba(0, 200, 180, 0.13)),
+        rgba(255, 255, 255, 0.92);
+    }
+
+    body.game-mkworld .highlight-tile {
+      border-color: rgba(117, 205, 239, 0.5);
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(240,252,255,0.92));
+    }
+
   </style>
 </head>
 <body class="game-mk8d">
@@ -1509,6 +1582,18 @@
       </div>
       <div class="handicap-explain">
         <strong>Multiplikator:</strong> Woche 1 läuft ohne Handicap. Ab Woche 2 wird der Faktor nach der aktuellen Wochenplatzierung der Fahrpunkte berechnet: Platz 1–3 = 0,90x · 4–6 = 1,00x · 7–10 = 1,10x · 11–15 = 1,20x · 16–19 = 1,30x. <strong>HCP</strong> zeigt den Punktegewinn/-verlust der Woche, <strong>HCP ges.</strong> die kumulierte Summe.
+      </div>
+    </section>
+
+
+    <section class="card report-card">
+      <div class="section-head">
+        <h2 id="reportTitle">Wöchentlicher Spielbericht</h2>
+        <div class="meta">Automatisch aus der ausgewählten Woche generiert</div>
+      </div>
+      <div class="weekly-report">
+        <p id="reportText" class="report-text">Spielbericht wird berechnet...</p>
+        <div id="highlightsGrid" class="highlights-grid" aria-label="Highlights der Woche"></div>
       </div>
     </section>
 
@@ -1622,6 +1707,9 @@
       positionsChart: document.getElementById("positionsChart"),
       pointsChart: document.getElementById("pointsChart"),
       momentumChart: document.getElementById("momentumChart"),
+      reportTitle: document.getElementById("reportTitle"),
+      reportText: document.getElementById("reportText"),
+      highlightsGrid: document.getElementById("highlightsGrid"),
       lineLegend: document.getElementById("lineLegend"),
       lineTooltip: document.getElementById("lineTooltip"),
       lineTooltipImg: document.getElementById("lineTooltipImg"),
@@ -2362,6 +2450,8 @@
       clearSvg(el.positionsChart);
       clearSvg(el.pointsChart);
       clearSvg(el.momentumChart);
+      if (el.reportText) el.reportText.textContent = "";
+      if (el.highlightsGrid) el.highlightsGrid.innerHTML = "";
       el.lineLegend.innerHTML = "";
     }
 
@@ -2479,6 +2569,122 @@
     }
 
     function hideLineTooltip() { el.lineTooltip.hidden = true; }
+
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatSigned(delta) {
+      return `${delta > 0 ? "+" : ""}${delta}`;
+    }
+
+    function buildWeeklyReport(weekIndex) {
+      const current = rankByWeek(weekIndex);
+      const weekData = state.weekColumns[weekIndex] || {};
+      const weekNo = weekData.week ?? weekIndex + 1;
+      const prevMap = new Map();
+      if (weekIndex > 0) rankByWeek(weekIndex - 1).forEach((p) => prevMap.set(p.id, p.rank));
+
+      const withDelta = current.map((p) => {
+        const prevRank = prevMap.get(p.id) ?? p.rank;
+        return { ...p, rankDelta: prevRank - p.rank };
+      });
+
+      const weeklyWinner = [...current].sort((a, b) => b.rawPointsWeek - a.rawPointsWeek || a.rank - b.rank)[0];
+      const leader = current[0];
+      const runnerUp = current[1] || null;
+      const bestClimber = [...withDelta].sort((a, b) => b.rankDelta - a.rankDelta || a.rank - b.rank)[0];
+      const biggestDrop = [...withDelta].sort((a, b) => a.rankDelta - b.rankDelta || b.rank - a.rank)[0];
+      const start = Math.max(0, weekIndex - 2);
+      const momentumLeader = [...current]
+        .map((p) => ({ ...p, recent: p.weekScores.slice(start, weekIndex + 1).reduce((a, b) => a + b, 0) }))
+        .sort((a, b) => b.recent - a.recent || a.rank - b.rank)[0];
+
+      let closestDuel = null;
+      for (let i = 0; i < current.length - 1; i += 1) {
+        const a = current[i];
+        const b = current[i + 1];
+        const gap = Math.abs(a.pointsTotal - b.pointsTotal);
+        if (!closestDuel || gap < closestDuel.gap) closestDuel = { a, b, gap };
+      }
+
+      const leaderGap = runnerUp ? leader.pointsTotal - runnerUp.pointsTotal : 0;
+      const leaderSentence = runnerUp
+        ? `${displayName(leader)} führt die Gesamtwertung mit ${leader.pointsTotal.toLocaleString("de-DE")} Punkten an und liegt ${leaderGap.toLocaleString("de-DE")} Punkte vor ${displayName(runnerUp)}.`
+        : `${displayName(leader)} führt die Gesamtwertung mit ${leader.pointsTotal.toLocaleString("de-DE")} Punkten an.`;
+      const winnerSentence = weeklyWinner
+        ? `Den Wochenbestwert in KW ${weekNo} erzielte ${displayName(weeklyWinner)} mit ${weeklyWinner.rawPointsWeek.toLocaleString("de-DE")} Fahrpunkten.`
+        : `Für KW ${weekNo} liegen noch keine Wochenpunkte vor.`;
+      const climberSentence = bestClimber && bestClimber.rankDelta > 0
+        ? `Größter Aufsteiger der Woche ist ${displayName(bestClimber)} mit ${formatSigned(bestClimber.rankDelta)} Plätzen.`
+        : `In dieser Woche gab es keine Positionsgewinne im Gesamtranking.`;
+      const dropSentence = biggestDrop && biggestDrop.rankDelta < 0
+        ? `${displayName(biggestDrop)} verlor mit ${formatSigned(biggestDrop.rankDelta)} Plätzen am stärksten.`
+        : `Größere Rückschläge blieben diesmal aus.`;
+      const momentumSentence = momentumLeader
+        ? `Das stärkste Momentum der letzten ${weekIndex < 2 ? weekIndex + 1 : 3} Datenwochen hat ${displayName(momentumLeader)} mit ${momentumLeader.recent.toLocaleString("de-DE")} gewerteten Punkten.`
+        : "";
+      const duelSentence = closestDuel
+        ? `Das engste Duell läuft zwischen ${displayName(closestDuel.a)} und ${displayName(closestDuel.b)} mit nur ${closestDuel.gap.toLocaleString("de-DE")} Punkten Abstand.`
+        : "";
+
+      return {
+        weekNo,
+        paragraph: `${winnerSentence} ${leaderSentence} ${climberSentence} ${dropSentence} ${momentumSentence} ${duelSentence}`,
+        highlights: [
+          {
+            label: "🏁 Tagessieger",
+            value: weeklyWinner ? displayName(weeklyWinner) : "-",
+            sub: weeklyWinner ? `${weeklyWinner.rawPointsWeek.toLocaleString("de-DE")} Fahrpunkte · Rang ${weeklyWinner.rank}` : "Keine Daten"
+          },
+          {
+            label: "🔥 Momentum",
+            value: momentumLeader ? displayName(momentumLeader) : "-",
+            sub: momentumLeader ? `${momentumLeader.recent.toLocaleString("de-DE")} Punkte in den letzten ${weekIndex < 2 ? weekIndex + 1 : 3} Datenwochen` : "Keine Daten"
+          },
+          {
+            label: "📈 Aufsteiger",
+            value: bestClimber && bestClimber.rankDelta > 0 ? displayName(bestClimber) : "Keine Veränderung",
+            sub: bestClimber && bestClimber.rankDelta > 0 ? `${formatSigned(bestClimber.rankDelta)} Plätze · jetzt Rang ${bestClimber.rank}` : "Niemand ist geklettert"
+          },
+          {
+            label: "📉 Rücksetzer",
+            value: biggestDrop && biggestDrop.rankDelta < 0 ? displayName(biggestDrop) : "Stabil",
+            sub: biggestDrop && biggestDrop.rankDelta < 0 ? `${formatSigned(biggestDrop.rankDelta)} Plätze · jetzt Rang ${biggestDrop.rank}` : "Keine nennenswerten Verluste"
+          },
+          {
+            label: "⚔️ Engstes Duell",
+            value: closestDuel ? `${displayName(closestDuel.a)} vs. ${displayName(closestDuel.b)}` : "-",
+            sub: closestDuel ? `${closestDuel.gap.toLocaleString("de-DE")} Punkte Abstand` : "Keine Daten"
+          },
+          {
+            label: "👑 Tabellenführer",
+            value: leader ? displayName(leader) : "-",
+            sub: leader ? `${leader.pointsTotal.toLocaleString("de-DE")} Gesamtpunkte${runnerUp ? ` · +${leaderGap.toLocaleString("de-DE")} auf P2` : ""}` : "Keine Daten"
+          }
+        ]
+      };
+    }
+
+    function renderWeeklyReport() {
+      if (!el.reportText || !el.highlightsGrid || !state.players.length || !state.weekColumns.length) return;
+      const report = buildWeeklyReport(state.selectedWeekIndex);
+      if (el.reportTitle) el.reportTitle.textContent = `Wöchentlicher Spielbericht – ${state.selectedSeasonLabel} · Woche ${report.weekNo}`;
+      el.reportText.textContent = report.paragraph;
+      el.highlightsGrid.innerHTML = report.highlights.map((item) => `
+        <article class="highlight-tile">
+          <div class="highlight-label">${escapeHtml(item.label)}</div>
+          <div class="highlight-value">${escapeHtml(item.value)}</div>
+          <div class="highlight-sub">${escapeHtml(item.sub)}</div>
+        </article>
+      `).join("");
+    }
 
     function renderTable() {
       const weekIndex = state.selectedWeekIndex;
@@ -2707,6 +2913,7 @@
       const titleEl = document.getElementById("tableTitle");
       if (titleEl) titleEl.textContent = `Tabelle – ${state.selectedSeasonLabel} · Woche ${weekNo}`;
       renderTable();
+      renderWeeklyReport();
       renderPositionsChart();
       renderPointsChart();
       renderMomentumChart();
