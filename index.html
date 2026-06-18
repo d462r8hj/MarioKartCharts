@@ -2608,7 +2608,7 @@
       };
     }
 
-    function calendarYearTopThree(year) {
+    function calendarYearRanking(year) {
       const seasonKeys = Array.from(new Set(
         state.allTournamentRows
           .filter((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d") === state.selectedGame)
@@ -2626,11 +2626,13 @@
             username: player.username,
             total: 0,
             rawTotal: 0,
-            participationCount: 0
+            participationCount: 0,
+            completedWeeks: 0
           };
           current.total += player.total || 0;
           current.rawTotal += player.rawTotal || 0;
           current.participationCount += (player.rawWeekScores || []).filter((score) => score > 0).length;
+          current.completedWeeks += (player.rawWeekScores || []).length;
           totals.set(player.id, current);
         });
       });
@@ -2638,8 +2640,107 @@
       return Array.from(totals.values())
         .filter((p) => p.total > 0)
         .sort((a, b) => b.total - a.total || b.rawTotal - a.rawTotal || a.name.localeCompare(b.name))
-        .slice(0, 3)
-        .map((p, idx) => ({ ...p, yearRank: idx + 1 }));
+        .map((p, idx, arr) => ({
+          ...p,
+          yearRank: idx + 1,
+          gapToAhead: idx > 0 ? arr[idx - 1].total - p.total : 0,
+          gapToBehind: idx < arr.length - 1 ? p.total - arr[idx + 1].total : 0
+        }));
+    }
+
+    function calendarYearTopThree(year) {
+      return calendarYearRanking(year).slice(0, 3);
+    }
+
+    function gapTextForRankingEntry(entry) {
+      if (!entry) return "Keine Daten";
+      if (entry.yearRank === 1) {
+        return entry.gapToBehind > 0
+          ? `+${entry.gapToBehind.toLocaleString("de-DE")} Punkte auf Platz 2`
+          : "Gleichstand an der Spitze";
+      }
+      return `${entry.gapToAhead.toLocaleString("de-DE")} Punkte Rückstand auf Platz ${entry.yearRank - 1}`;
+    }
+
+    function countRemainingTournamentDaysUntil(endDate, gameKey) {
+      const gameCfg = GAME_CONFIG[gameKey] || GAME_CONFIG.mk8d;
+      const targetWeekday = gameCfg.weekday;
+      const berlin = getBerlinNowParts(new Date());
+      const today = new Date(new Date().toISOString().slice(0, 10));
+      let count = 0;
+      let currentDate = new Date(today);
+      while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay();
+        const isoWeekday = dayOfWeek === 0 ? 7 : dayOfWeek;
+        if (isoWeekday === targetWeekday) {
+          if (currentDate.getTime() === today.getTime()) {
+            const beforeStart = berlin.hour < gameCfg.startHour || (berlin.hour === gameCfg.startHour && berlin.minute < gameCfg.startMinute);
+            if (berlin.weekday === targetWeekday && beforeStart) count += 1;
+          } else {
+            count += 1;
+          }
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      return count;
+    }
+
+    function forecastLabel(entry, idx, arr) {
+      if (!entry) return { value: "-", sub: "Keine Daten" };
+      const projected = Math.round(entry.projectedTotal || 0);
+      let gap = "";
+      if (idx === 0 && arr[1]) gap = ` · +${Math.max(0, Math.round(projected - arr[1].projectedTotal)).toLocaleString("de-DE")} auf P2`;
+      if (idx > 0) gap = ` · ${Math.max(0, Math.round(arr[idx - 1].projectedTotal - projected)).toLocaleString("de-DE")} Rückstand auf P${idx}`;
+      return { value: displayName(entry), sub: `Prognose: ${projected.toLocaleString("de-DE")} Punkte${gap}` };
+    }
+
+    function seasonForecastTopThree(weekIndex) {
+      const current = rankByWeek(weekIndex);
+      const currentSeason = currentSeasonKey();
+      const remaining = state.selectedSeasonKey === currentSeason ? countRemainingTournamentDays(state.selectedSeasonKey, state.selectedGame) : 0;
+      return current.map((p) => {
+        const recentScores = (p.weekScores || []).slice(Math.max(0, weekIndex - 2), weekIndex + 1);
+        const avg = recentScores.length ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 0;
+        return { ...p, projectedTotal: p.pointsTotal + avg * remaining, remainingTournaments: remaining };
+      }).sort((a, b) => b.projectedTotal - a.projectedTotal || b.pointsTotal - a.pointsTotal || a.name.localeCompare(b.name)).slice(0, 3);
+    }
+
+    function yearForecastTopThree(year) {
+      const ranking = calendarYearRanking(year);
+      const endOfYear = new Date(Date.UTC(year, 11, 31));
+      const currentYear = new Date().getFullYear();
+      const remaining = year === currentYear ? countRemainingTournamentDaysUntil(endOfYear, state.selectedGame) : 0;
+      return ranking.map((p) => {
+        const divisor = Math.max(1, p.completedWeeks || p.participationCount || 1);
+        const avg = p.total / divisor;
+        return { ...p, projectedTotal: p.total + avg * remaining, remainingTournaments: remaining };
+      }).sort((a, b) => b.projectedTotal - a.projectedTotal || b.total - a.total || a.name.localeCompare(b.name)).slice(0, 3);
+    }
+
+    function monthName(date) {
+      return date.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+    }
+
+    function driverOfMonth(weekIndex) {
+      const selectedWeek = state.weekColumns[weekIndex];
+      if (!selectedWeek) return null;
+      const selectedDateParts = parseIsoDateParts(selectedWeek.date || "");
+      const selectedMonth = selectedDateParts ? selectedDateParts.month : new Date().getMonth() + 1;
+      const selectedYear = selectedDateParts ? selectedDateParts.year : (selectedWeek.year || new Date().getFullYear());
+      const monthWeekIndexes = state.weekColumns
+        .map((w, idx) => ({ ...w, idx, parts: parseIsoDateParts(w.date || "") }))
+        .filter((w) => w.idx <= weekIndex && w.parts && w.parts.year === selectedYear && w.parts.month === selectedMonth)
+        .map((w) => w.idx);
+      if (!monthWeekIndexes.length) return null;
+
+      const monthly = state.players.map((p) => {
+        const points = monthWeekIndexes.reduce((sum, idx) => sum + (p.weekScores?.[idx] || 0), 0);
+        const raw = monthWeekIndexes.reduce((sum, idx) => sum + (p.rawWeekScores?.[idx] || 0), 0);
+        const starts = monthWeekIndexes.filter((idx) => (p.rawWeekScores?.[idx] || 0) > 0).length;
+        return { ...p, monthPoints: points, monthRaw: raw, monthStarts: starts, monthLabel: monthName(new Date(Date.UTC(selectedYear, selectedMonth - 1, 1))) };
+      }).filter((p) => p.monthPoints > 0);
+
+      return monthly.sort((a, b) => b.monthPoints - a.monthPoints || b.monthRaw - a.monthRaw || a.name.localeCompare(b.name))[0] || null;
     }
 
     function playerLabel(player) {
@@ -2670,6 +2771,9 @@
       const participation = participationStats(weekIndex);
       const reportYear = weekData.year || parseYear(state.selectedSeasonKey) || new Date().getFullYear();
       const yearTopThree = calendarYearTopThree(reportYear);
+      const seasonForecast = seasonForecastTopThree(weekIndex);
+      const yearForecast = yearForecastTopThree(reportYear);
+      const monthDriver = driverOfMonth(weekIndex);
 
       let closestDuel = null;
       for (let i = 0; i < current.length - 1; i += 1) {
@@ -2746,17 +2850,52 @@
           {
             label: `🥇 Jahreswertung ${reportYear}`,
             value: yearTopThree[0] ? displayName(yearTopThree[0]) : "-",
-            sub: yearTopThree[0] ? `${yearTopThree[0].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
+            sub: yearTopThree[0] ? `${yearTopThree[0].total.toLocaleString("de-DE")} Punkte · ${gapTextForRankingEntry(yearTopThree[0])}` : "Keine Daten"
           },
           {
             label: `🥈 Jahreswertung ${reportYear}`,
             value: yearTopThree[1] ? displayName(yearTopThree[1]) : "-",
-            sub: yearTopThree[1] ? `${yearTopThree[1].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
+            sub: yearTopThree[1] ? `${yearTopThree[1].total.toLocaleString("de-DE")} Punkte · ${gapTextForRankingEntry(yearTopThree[1])}` : "Keine Daten"
           },
           {
             label: `🥉 Jahreswertung ${reportYear}`,
             value: yearTopThree[2] ? displayName(yearTopThree[2]) : "-",
-            sub: yearTopThree[2] ? `${yearTopThree[2].total.toLocaleString("de-DE")} Punkte saisonübergreifend` : "Keine Daten"
+            sub: yearTopThree[2] ? `${yearTopThree[2].total.toLocaleString("de-DE")} Punkte · ${gapTextForRankingEntry(yearTopThree[2])}` : "Keine Daten"
+          },
+          {
+            label: "🔮 Saisonprognose P1",
+            value: forecastLabel(seasonForecast[0], 0, seasonForecast).value,
+            sub: forecastLabel(seasonForecast[0], 0, seasonForecast).sub
+          },
+          {
+            label: "🔮 Saisonprognose P2",
+            value: forecastLabel(seasonForecast[1], 1, seasonForecast).value,
+            sub: forecastLabel(seasonForecast[1], 1, seasonForecast).sub
+          },
+          {
+            label: "🔮 Saisonprognose P3",
+            value: forecastLabel(seasonForecast[2], 2, seasonForecast).value,
+            sub: forecastLabel(seasonForecast[2], 2, seasonForecast).sub
+          },
+          {
+            label: `📅 Jahresprognose ${reportYear} P1`,
+            value: forecastLabel(yearForecast[0], 0, yearForecast).value,
+            sub: forecastLabel(yearForecast[0], 0, yearForecast).sub
+          },
+          {
+            label: `📅 Jahresprognose ${reportYear} P2`,
+            value: forecastLabel(yearForecast[1], 1, yearForecast).value,
+            sub: forecastLabel(yearForecast[1], 1, yearForecast).sub
+          },
+          {
+            label: `📅 Jahresprognose ${reportYear} P3`,
+            value: forecastLabel(yearForecast[2], 2, yearForecast).value,
+            sub: forecastLabel(yearForecast[2], 2, yearForecast).sub
+          },
+          {
+            label: "🏆 Fahrer des Monats",
+            value: monthDriver ? displayName(monthDriver) : "-",
+            sub: monthDriver ? `${monthDriver.monthPoints.toLocaleString("de-DE")} Punkte im ${monthDriver.monthLabel} · ${monthDriver.monthStarts} Starts` : "Keine Monatsdaten"
           }
         ]
       };
