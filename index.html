@@ -736,6 +736,149 @@
       th:nth-child(4), td:nth-child(4),
       th:nth-child(5), td:nth-child(5) { width: 19%; white-space: nowrap; }
     }
+
+
+    .standings-card {
+      width: 100%;
+    }
+
+    .standings-card .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 12px 14px;
+    }
+
+    .leaderboard-table {
+      min-width: 980px;
+      table-layout: fixed;
+    }
+
+    .leaderboard-table th:nth-child(1),
+    .leaderboard-table td:nth-child(1) { width: 48px; text-align: center; }
+    .leaderboard-table th:nth-child(2),
+    .leaderboard-table td:nth-child(2) { width: 260px; }
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) { width: 120px; }
+    .leaderboard-table th:nth-child(4),
+    .leaderboard-table td:nth-child(4) { width: 130px; }
+    .leaderboard-table th:nth-child(5),
+    .leaderboard-table td:nth-child(5) { width: 120px; }
+    .leaderboard-table th:nth-child(6),
+    .leaderboard-table td:nth-child(6) { width: 120px; }
+    .leaderboard-table th:nth-child(7),
+    .leaderboard-table td:nth-child(7) { width: 120px; }
+    .leaderboard-table th:nth-child(8),
+    .leaderboard-table td:nth-child(8) { width: 90px; }
+
+    .multiplier-sub {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 859px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: auto; }
+      .leaderboard-table { min-width: 860px; font-size: 0.84rem; }
+      .standings-card .table-wrap { padding: 8px; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 20px, 620px); margin: 10px auto 18px; }
+      .hero { padding: 14px; border-radius: 16px; }
+      .hero-top { align-items: flex-start; }
+      .hero h1 { font-size: 1.35rem; line-height: 1.12; }
+      .game-switch { width: 100%; }
+      .game-btn { flex: 1; padding: 8px 6px; font-size: 0.76rem; }
+      .countdown-container { display: grid; grid-template-columns: 1fr; gap: 7px; }
+      .countdown { width: 100%; font-size: 0.75rem; white-space: normal; }
+      .section-head { align-items: flex-start; }
+      .controls { gap: 12px; }
+      .slider-row { grid-template-columns: 1fr; }
+      .pill { justify-self: start; }
+      .charts { padding: 8px; }
+      .chart-card { padding: 8px; overflow-x: auto; }
+      .chart-svg { min-width: 680px; }
+      .leaderboard-table,
+      .leaderboard-table thead,
+      .leaderboard-table tbody,
+      .leaderboard-table th,
+      .leaderboard-table td,
+      .leaderboard-table tr {
+        display: block;
+      }
+      .leaderboard-table {
+        min-width: 0;
+        width: 100%;
+        font-size: 0.88rem;
+      }
+      .leaderboard-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+      .leaderboard-table tbody tr {
+        margin: 0 0 10px;
+        padding: 10px;
+        border: 1px solid #dbe4ff;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 6px 16px rgba(2, 8, 26, 0.08);
+      }
+      .leaderboard-table tbody tr:nth-child(odd) { background: #fff; }
+      .leaderboard-table tbody td {
+        border: 0;
+        padding: 5px 0;
+      }
+      .leaderboard-table tbody td[data-label] {
+        display: grid;
+        grid-template-columns: minmax(112px, 42%) 1fr;
+        align-items: center;
+        gap: 8px;
+        text-align: right;
+      }
+      .leaderboard-table tbody td[data-label]::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        letter-spacing: 0.2px;
+      }
+      .leaderboard-table tbody td:first-child {
+        float: right;
+        min-width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: linear-gradient(120deg, var(--blue-1), var(--violet-1));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .leaderboard-table .player {
+        padding-right: 44px;
+      }
+      .leaderboard-table .avatar { width: 34px; height: 34px; }
+      .leaderboard-table .player > div > div {
+        max-width: 22ch;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .standings-card .table-wrap {
+        overflow-x: visible;
+        padding: 8px 10px 12px;
+      }
+    }
+
   </style>
 </head>
 <body class="game-mk8d">
@@ -771,23 +914,7 @@
           </div>
         </div>
         <div id="error" class="error" hidden></div>
-        <div class="table-wrap">
-          <table aria-label="Mario Kart Rangliste">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th title="Name">🏎️</th>
-                <th class="num" title="Fahrpunkte aus CSV">🏁</th>
-                <th class="num" title="Handicap-Multiplikator">⚖️</th>
-                <th class="num" title="Handicap-Punkte">🎁</th>
-                <th class="num" title="Gewertete Wochenpunkte">📅</th>
-                <th class="num" title="Gesamt">🗓️</th>
-                <th class="num" title="Delta">↕️</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody"></tbody>
-          </table>
-        </div>
+
       </section>
 
       <section class="card">
@@ -812,6 +939,31 @@
         </div>
       </section>
     </div>
+
+
+    <section class="card standings-card">
+      <div class="section-head">
+        <h2>Tabelle</h2>
+        <div class="meta">Fahrpunkte, Handicap und Gesamtwertung</div>
+      </div>
+      <div class="table-wrap">
+        <table class="leaderboard-table" aria-label="Mario Kart Rangliste mit Handicap">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Spieler</th>
+              <th class="num">Fahrpunkte</th>
+              <th class="num">Multiplikator</th>
+              <th class="num">Handicap</th>
+              <th class="num">Gewertet</th>
+              <th class="num">Gesamt</th>
+              <th class="num">Trend</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <div id="lineTooltip" class="line-tooltip" hidden>
@@ -1776,12 +1928,12 @@
               </div>
             </div>
           </td>
-          <td class="num">${p.rawPointsWeek.toLocaleString("de-DE")}</td>
-          <td class="num">${formatMultiplier(p.multiplierWeek)}</td>
-          <td class="num ${handicapClass(p.handicapPointsWeek)}">${p.handicapPointsWeek > 0 ? "+" : ""}${p.handicapPointsWeek.toLocaleString("de-DE")}</td>
-          <td class="num">${p.pointsWeek.toLocaleString("de-DE")}</td>
-          <td class="num">${p.pointsTotal.toLocaleString("de-DE")}</td>
-          <td class="num ${trendClass(delta)}">${delta > 0 ? "+" : ""}${delta}</td>
+          <td class="num" data-label="Fahrpunkte">${p.rawPointsWeek.toLocaleString("de-DE")}</td>
+          <td class="num" data-label="Multiplikator">${formatMultiplier(p.multiplierWeek)}<small class="multiplier-sub">${weekIndex === 0 ? "Woche 1" : `Platz ${prevRank}`}</small></td>
+          <td class="num ${handicapClass(p.handicapPointsWeek)}" data-label="Handicap">${p.handicapPointsWeek > 0 ? "+" : ""}${p.handicapPointsWeek.toLocaleString("de-DE")}</td>
+          <td class="num" data-label="Gewertet">${p.pointsWeek.toLocaleString("de-DE")}</td>
+          <td class="num" data-label="Gesamt">${p.pointsTotal.toLocaleString("de-DE")}</td>
+          <td class="num ${trendClass(delta)}" data-label="Trend">${delta > 0 ? "+" : ""}${delta}</td>
         `;
         el.leaderboardBody.appendChild(tr);
       });
