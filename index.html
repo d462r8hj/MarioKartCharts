@@ -663,13 +663,13 @@
 
       .content-grid > .card:first-child th:nth-child(1),
       .content-grid > .card:first-child td:nth-child(1) {
-        width: 7%;
+        width: 8%;
         text-align: center;
       }
 
       .content-grid > .card:first-child th:nth-child(2),
       .content-grid > .card:first-child td:nth-child(2) {
-        width: 31%;
+        width: 36%;
       }
 
       .content-grid > .card:first-child th:nth-child(3),
@@ -677,10 +677,8 @@
       .content-grid > .card:first-child th:nth-child(4),
       .content-grid > .card:first-child td:nth-child(4),
       .content-grid > .card:first-child th:nth-child(5),
-      .content-grid > .card:first-child td:nth-child(5),
-      .content-grid > .card:first-child th:nth-child(6),
-      .content-grid > .card:first-child td:nth-child(6) {
-        width: 15.5%;
+      .content-grid > .card:first-child td:nth-child(5) {
+        width: 18.666%;
         white-space: nowrap;
       }
 
@@ -730,11 +728,10 @@
         padding-left: 2px;
         padding-right: 2px;
       }
-      th:nth-child(2), td:nth-child(2) { width: 30%; white-space: nowrap; }
+      th:nth-child(2), td:nth-child(2) { width: 32%; white-space: nowrap; }
       th:nth-child(3), td:nth-child(3),
       th:nth-child(4), td:nth-child(4),
-      th:nth-child(5), td:nth-child(5),
-      th:nth-child(6), td:nth-child(6) { width: 15.5%; white-space: nowrap; }
+      th:nth-child(5), td:nth-child(5) { width: 19%; white-space: nowrap; }
     }
   </style>
 </head>
@@ -777,9 +774,8 @@
               <tr>
                 <th>#</th>
                 <th title="Name">🏎️</th>
-                <th class="num" title="Punkte durchs Rennen">🏁</th>
-                <th class="num" title="Punkte durch Handicap">🎁</th>
-                <th class="num" title="Gesamtpunkte">🗓️</th>
+                <th class="num" title="Woche">📅</th>
+                <th class="num" title="Gesamt">🗓️</th>
                 <th class="num" title="Delta">↕️</th>
               </tr>
             </thead>
@@ -1365,13 +1361,6 @@
       return 0;
     }
 
-    function getHandicapBonus(rank) {
-      if (rank >= 16) return 60;
-      if (rank >= 11) return 40;
-      if (rank >= 6) return 20;
-      return 0;
-    }
-
     function hasScoreEntry(tournament, player) {
       const keys = [player.id, ...(player.scoreKeys || [])];
       return keys.some((key) => {
@@ -1447,30 +1436,10 @@
         return false;
       });
 
-      const players = withScores.map((p) => ({
-        ...p,
-        weekScores: [],
-        handicapScores: [],
-        total: 0
-      }));
-
-      finalTournaments.forEach((tournament, tournamentIndex) => {
-        const rankingBefore = [...players]
-          .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
-          .map((p, idx) => ({ id: p.id, rank: idx + 1 }));
-
-        const rankMap = new Map(rankingBefore.map((r) => [r.id, r.rank]));
-
-        players.forEach((player) => {
-          const raceScore = scoreForPlayer(tournament, player);
-          const participated = hasScoreEntry(tournament, player);
-          const rankBefore = rankMap.get(player.id) || players.length;
-          const handicap = tournamentIndex > 0 && participated ? getHandicapBonus(rankBefore) : 0;
-
-          player.weekScores.push(raceScore);
-          player.handicapScores.push(handicap);
-          player.total += raceScore + handicap;
-        });
+      const players = withScores.map((p) => {
+        const weekScores = finalTournaments.map((t) => scoreForPlayer(t, p));
+        const total = weekScores.reduce((a, b) => a + b, 0);
+        return { ...p, weekScores, total };
       });
 
       const weekColumns = finalTournaments.map((t, idx) => ({
@@ -1648,23 +1617,13 @@
     }
 
     function cumulativeAt(player, weekIndex) {
-      let total = 0;
-      for (let i = 0; i <= weekIndex; i += 1) {
-        total += player.weekScores[i] || 0;
-        total += player.handicapScores?.[i] || 0;
-      }
-      return total;
+      return player.weekScores.slice(0, weekIndex + 1).reduce((a, b) => a + b, 0);
     }
 
     function rankByWeek(weekIndex) {
       const ranked = state.players
-        .map((p) => ({
-          ...p,
-          pointsWeek: p.weekScores[weekIndex] || 0,
-          handicapWeek: p.handicapScores?.[weekIndex] || 0,
-          pointsTotal: cumulativeAt(p, weekIndex)
-        }))
-        .sort((a, b) => b.pointsTotal - a.pointsTotal || (b.pointsWeek + b.handicapWeek) - (a.pointsWeek + a.handicapWeek) || a.name.localeCompare(b.name));
+        .map((p) => ({ ...p, pointsWeek: p.weekScores[weekIndex] || 0, pointsTotal: cumulativeAt(p, weekIndex) }))
+        .sort((a, b) => b.pointsTotal - a.pointsTotal || b.pointsWeek - a.pointsWeek || a.name.localeCompare(b.name));
       return ranked.map((p, idx) => ({ ...p, rank: idx + 1 }));
     }
 
@@ -1737,7 +1696,6 @@
             </div>
           </td>
           <td class="num">${p.pointsWeek.toLocaleString("de-DE")}</td>
-          <td class="num">${p.handicapWeek.toLocaleString("de-DE")}</td>
           <td class="num">${p.pointsTotal.toLocaleString("de-DE")}</td>
           <td class="num ${trendClass(delta)}">${delta > 0 ? "+" : ""}${delta}</td>
         `;
@@ -1885,11 +1843,7 @@
       const ranked = rankByWeek(current);
       const top = ranked.slice(0, 10).map((p) => {
         const start = Math.max(0, current - 2);
-        let recent = 0;
-        for (let i = start; i <= current; i += 1) {
-          recent += p.weekScores[i] || 0;
-          recent += p.handicapScores?.[i] || 0;
-        }
+        const recent = p.weekScores.slice(start, current + 1).reduce((a, b) => a + b, 0);
         return { ...p, recent };
       }).sort((a, b) => b.recent - a.recent);
       if (!top.length) return;
