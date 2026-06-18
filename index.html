@@ -2053,9 +2053,9 @@
           // Ab Woche 2 zählt die Platzierung der aktuellen Fahrwoche nach Rohpunkten.
           const referenceRank = weekIndex === 0 ? null : currentWeekRankByPlayerId.get(player.id);
           const handicapEnabled =
-          seasonKey === "q3-2026" ||
-          seasonKey === "q4-2026" ||
-          /^q[1-4]-(202[7-9]|20[3-9][0-9])$/.test(seasonKey);
+            targetSeasonKey === "q3-2026" ||
+            targetSeasonKey === "q4-2026" ||
+            /^q[1-4]-(202[7-9]|20[3-9][0-9])$/.test(targetSeasonKey);
 
         const multiplier =
           handicapEnabled && referenceRank
