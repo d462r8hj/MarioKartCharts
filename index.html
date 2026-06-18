@@ -749,14 +749,24 @@
     }
 
     .leaderboard-table {
-      min-width: 980px;
+      min-width: 900px;
       table-layout: fixed;
     }
 
     .leaderboard-table th:nth-child(1),
     .leaderboard-table td:nth-child(1) { width: 48px; text-align: center; }
     .leaderboard-table th:nth-child(2),
-    .leaderboard-table td:nth-child(2) { width: 260px; }
+    .leaderboard-table td:nth-child(2) { width: 190px; }
+    .leaderboard-table .player { gap: 8px; }
+    .leaderboard-table .player > div { min-width: 0; }
+    .leaderboard-table .player > div > div,
+    .leaderboard-table .player .player-meta {
+      display: block;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .leaderboard-table th:nth-child(3),
     .leaderboard-table td:nth-child(3) { width: 120px; }
     .leaderboard-table th:nth-child(4),
@@ -782,7 +792,7 @@
       .content-grid { grid-template-columns: 1fr; }
       .charts { grid-template-columns: 1fr; }
       .chart-card.full { grid-column: auto; }
-      .leaderboard-table { min-width: 860px; font-size: 0.84rem; }
+      .leaderboard-table { min-width: 820px; font-size: 0.84rem; }
       .standings-card .table-wrap { padding: 8px; }
     }
 
@@ -1622,46 +1632,48 @@
         total: 0
       }));
 
-      let previousRanking = [];
-
       finalTournaments.forEach((tournament, weekIndex) => {
+        const rawRanking = players
+          .map((player) => ({
+            player,
+            rawScore: scoreForPlayer(tournament, player)
+          }))
+          .sort((a, b) => b.rawScore - a.rawScore || a.player.name.localeCompare(b.player.name));
+
+        const currentWeekRankByPlayerId = new Map();
+        rawRanking.forEach((entry, idx) => {
+          currentWeekRankByPlayerId.set(entry.player.id, idx + 1);
+        });
+
         const weekResults = players.map((player) => {
           const rawScore = scoreForPlayer(tournament, player);
 
           // Woche 1 jeder Saison startet ohne Handicap.
-          // Ab Woche 2 zählt die Tabellenplatzierung nach der direkt vorherigen Woche.
-          const previousRank = weekIndex === 0
-            ? null
-            : previousRanking.findIndex((rankedPlayer) => rankedPlayer.id === player.id) + 1;
-
-          const multiplier = previousRank ? getHandicapMultiplier(previousRank) : 1.00;
+          // Ab Woche 2 zählt die Platzierung der aktuellen Fahrwoche (nach Rohpunkten),
+          // nicht die Gesamtplatzierung der Tabelle.
+          const referenceRank = weekIndex === 0 ? null : currentWeekRankByPlayerId.get(player.id);
+          const multiplier = referenceRank ? getHandicapMultiplier(referenceRank) : 1.00;
           const adjustedScore = Math.round(rawScore * multiplier);
           const handicapScore = adjustedScore - rawScore;
 
           return {
             player,
             rawScore,
+            referenceRank,
             multiplier,
             adjustedScore,
             handicapScore
           };
         });
 
-        weekResults.forEach(({ player, rawScore, multiplier, adjustedScore, handicapScore }) => {
+        weekResults.forEach(({ player, rawScore, referenceRank, multiplier, adjustedScore, handicapScore }) => {
           player.rawWeekScores.push(rawScore);
+          player.handicapReferenceRanks = player.handicapReferenceRanks || [];
+          player.handicapReferenceRanks.push(referenceRank || null);
           player.handicapMultipliers.push(multiplier);
           player.handicapPoints.push(handicapScore);
           player.weekScores.push(adjustedScore);
         });
-
-        previousRanking = [...players]
-          .map((player) => ({
-            id: player.id,
-            name: player.name,
-            pointsWeek: player.weekScores[weekIndex] || 0,
-            pointsTotal: player.weekScores.reduce((sum, score) => sum + score, 0)
-          }))
-          .sort((a, b) => b.pointsTotal - a.pointsTotal || b.pointsWeek - a.pointsWeek || a.name.localeCompare(b.name));
       });
 
       players.forEach((player) => {
@@ -1853,6 +1865,7 @@
           rawPointsWeek: p.rawWeekScores?.[weekIndex] || 0,
           multiplierWeek: p.handicapMultipliers?.[weekIndex] || 1.00,
           handicapPointsWeek: p.handicapPoints?.[weekIndex] || 0,
+          referenceRankWeek: p.handicapReferenceRanks?.[weekIndex] || null,
           pointsWeek: p.weekScores[weekIndex] || 0,
           pointsTotal: cumulativeAt(p, weekIndex)
         }))
@@ -1929,7 +1942,7 @@
             </div>
           </td>
           <td class="num" data-label="Fahrpunkte">${p.rawPointsWeek.toLocaleString("de-DE")}</td>
-          <td class="num" data-label="Multiplikator">${formatMultiplier(p.multiplierWeek)}<small class="multiplier-sub">${weekIndex === 0 ? "Woche 1" : `Platz ${prevRank}`}</small></td>
+          <td class="num" data-label="Multiplikator">${formatMultiplier(p.multiplierWeek)}<small class="multiplier-sub">${weekIndex === 0 ? "Woche 1" : `Wochenplatz ${p.referenceRankWeek}`}</small></td>
           <td class="num ${handicapClass(p.handicapPointsWeek)}" data-label="Handicap">${p.handicapPointsWeek > 0 ? "+" : ""}${p.handicapPointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gewertet">${p.pointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gesamt">${p.pointsTotal.toLocaleString("de-DE")}</td>
