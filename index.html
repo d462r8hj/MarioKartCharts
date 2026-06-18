@@ -909,49 +909,176 @@
     }
 
 
-    /* Finale Tabellen-Overrides: greifen nach allen älteren Tabellenregeln. */
-    .leaderboard-table {
-      min-width: 1040px !important;
-      table-layout: fixed !important;
+    /* Layout-Umbau: Kopfbereich enthält Spielinfo, Saisonfilter und Wochenfilter. Danach Tabelle, danach Diagramme. */
+    .hero-dashboard {
+      position: relative;
+      z-index: 1;
+      margin-top: 14px;
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(10, 22, 77, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(6px);
     }
+
+    .hero-meta-row {
+      display: grid;
+      gap: 4px;
+    }
+
+    .hero-meta-label {
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .hero-meta-value {
+      color: #fff;
+      font-size: clamp(0.9rem, 1.5vw, 1.06rem);
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .hero-controls {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(300px, 0.9fr);
+      gap: 14px;
+      align-items: end;
+    }
+
+    .hero-controls label,
+    .hero-controls .season-controls-label {
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.78rem;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .hero-controls .season-switch {
+      gap: 10px;
+      padding: 4px 2px 7px;
+    }
+
+    .hero-controls .season-btn {
+      width: 58px;
+      border-color: rgba(255, 255, 255, 0.42);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .hero-controls .slider-row {
+      grid-template-columns: 1fr auto;
+    }
+
+    .hero-controls input[type="range"] {
+      accent-color: #fff;
+    }
+
+    .hero-controls .pill {
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: none;
+    }
+
+    .hero-error {
+      margin: 0;
+      color: #7a1010;
+    }
+
+    .charts-card {
+      width: 100%;
+    }
+
+    .charts-card .charts {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .charts-card .chart-card.full {
+      grid-column: 1 / -1;
+    }
+
+    /* Tabelle: Spielername vollständig und einzeilig, keine abgeschnittenen Namen. */
+    .leaderboard-table {
+      width: max-content;
+      min-width: 100%;
+      table-layout: auto;
+      font-size: 0.86rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      white-space: nowrap;
+    }
+
     .leaderboard-table th:nth-child(2),
     .leaderboard-table td:nth-child(2) {
-      width: 70px !important;
-      max-width: 70px !important;
+      width: auto !important;
+      min-width: max-content;
     }
+
+    .leaderboard-table .player {
+      gap: 7px;
+      min-width: max-content;
+      padding-right: 6px;
+    }
+
     .leaderboard-table .player > div {
-      max-width: 42px !important;
+      max-width: none !important;
+      min-width: max-content;
     }
+
     .leaderboard-table .player-name {
-      white-space: normal !important;
+      white-space: nowrap !important;
       overflow: visible !important;
       text-overflow: clip !important;
-      overflow-wrap: anywhere !important;
-      word-break: break-word !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      font-size: 0.82rem;
+      line-height: 1.15;
+    }
+
+    .leaderboard-table .player-meta {
+      display: none !important;
+    }
+
+    @media (min-width: 980px) {
+      .charts { grid-template-columns: 1fr 1fr; }
+      .chart-card.full { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 760px) {
+      .hero-controls {
+        grid-template-columns: 1fr;
+      }
+      .hero-controls .season-btn {
+        width: 54px;
+      }
+      .charts-card .charts {
+        grid-template-columns: 1fr;
+      }
+      .charts-card .chart-card.full {
+        grid-column: auto;
+      }
     }
 
     @media (max-width: 620px) {
-      .leaderboard-table,
-      .leaderboard-table thead,
-      .leaderboard-table tbody,
-      .leaderboard-table th,
-      .leaderboard-table td,
-      .leaderboard-table tr { display: block !important; }
-      .leaderboard-table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
-      .leaderboard-table thead {
-        position: absolute !important;
-        width: 1px !important;
-        height: 1px !important;
-        overflow: hidden !important;
-        clip: rect(0 0 0 0) !important;
+      .hero-dashboard {
+        padding: 10px;
       }
-      .leaderboard-table tbody td { width: auto !important; max-width: none !important; }
-      .leaderboard-table tbody td[data-label] {
-        display: grid !important;
-        grid-template-columns: minmax(112px, 42%) 1fr !important;
+      .leaderboard-table tbody td:nth-child(2) {
+        padding-right: 44px;
       }
-      .leaderboard-table .player > div { max-width: none !important; }
-      .leaderboard-table .player-name { font-size: 0.92rem !important; }
+      .leaderboard-table .player {
+        padding-right: 0;
+      }
+      .leaderboard-table .player-name {
+        font-size: 0.95rem !important;
+      }
     }
 
   </style>
@@ -971,48 +1098,28 @@
         <div id="seasonEndBanner" class="countdown">Saisonende wird berechnet...</div>
         <div id="remainingTournamentsBanner" class="countdown">Verbl. Turniertage wird berechnet...</div>
       </div>
-    </section>
 
-    <div class="content-grid">
-      <section class="card">
-        <div class="section-head">
-          <h2>Rangliste</h2>
-          <div class="meta" id="dataMeta">Lade Daten...</div>
+      <div class="hero-dashboard">
+        <div class="hero-meta-row">
+          <div class="hero-meta-label">Aktuelle Ansicht</div>
+          <div class="hero-meta-value" id="dataMeta">Lade Daten...</div>
         </div>
-        <div class="controls">
-          <label class="season-controls-label">Saison</label>
-          <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
-          <label for="weekSlider">Woche auswählen</label>
-          <div class="slider-row">
-            <input id="weekSlider" type="range" min="0" max="0" value="0" />
-            <span id="weekLabel" class="pill">Woche 1</span>
+        <div class="hero-controls">
+          <div class="season-controls">
+            <label class="season-controls-label">Saison</label>
+            <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
+          </div>
+          <div class="week-controls">
+            <label for="weekSlider">Woche auswählen</label>
+            <div class="slider-row">
+              <input id="weekSlider" type="range" min="0" max="0" value="0" />
+              <span id="weekLabel" class="pill">Woche 1</span>
+            </div>
           </div>
         </div>
-        <div id="error" class="error" hidden></div>
-      </section>
-
-      <section class="card">
-        <div class="section-head">
-          <h2>Diagramme</h2>
-          <div class="meta">Nur Wochen mit vorhandenen Daten</div>
-        </div>
-        <div class="charts">
-          <article class="chart-card full">
-            <h3>Platzierungsverlauf je Spieler</h3>
-            <svg id="positionsChart" class="chart-svg" viewBox="0 0 1080 420" role="img" aria-label="Platzierungsverlauf"></svg>
-            <div id="lineLegend" class="legend"></div>
-          </article>
-          <article class="chart-card">
-            <h3>Kumulierte Punkte</h3>
-            <svg id="pointsChart" class="chart-svg" viewBox="0 0 520 360" role="img" aria-label="Kumulierte Punkte"></svg>
-          </article>
-          <article class="chart-card">
-            <h3>Momentum (letzte 3 Datenwochen)</h3>
-            <svg id="momentumChart" class="chart-svg" viewBox="0 0 520 360" role="img" aria-label="Momentum"></svg>
-          </article>
-        </div>
-      </section>
-    </div>
+        <div id="error" class="error hero-error" hidden></div>
+      </div>
+    </section>
 
     <section class="card standings-card">
       <div class="section-head">
@@ -1037,6 +1144,28 @@
           </thead>
           <tbody id="leaderboardBody"></tbody>
         </table>
+      </div>
+    </section>
+
+    <section class="card charts-card">
+      <div class="section-head">
+        <h2>Diagramme</h2>
+        <div class="meta">Auf Tabellenbreite angepasst · nur Wochen mit vorhandenen Daten</div>
+      </div>
+      <div class="charts">
+        <article class="chart-card full">
+          <h3>Platzierungsverlauf je Spieler</h3>
+          <svg id="positionsChart" class="chart-svg" viewBox="0 0 1080 420" role="img" aria-label="Platzierungsverlauf"></svg>
+          <div id="lineLegend" class="legend"></div>
+        </article>
+        <article class="chart-card">
+          <h3>Kumulierte Punkte</h3>
+          <svg id="pointsChart" class="chart-svg" viewBox="0 0 520 360" role="img" aria-label="Kumulierte Punkte"></svg>
+        </article>
+        <article class="chart-card">
+          <h3>Momentum (letzte 3 Datenwochen)</h3>
+          <svg id="momentumChart" class="chart-svg" viewBox="0 0 520 360" role="img" aria-label="Momentum"></svg>
+        </article>
       </div>
     </section>
   </main>
