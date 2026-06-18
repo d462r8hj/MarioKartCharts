@@ -407,8 +407,8 @@
     }
 
     .avatar {
-      width: 36px;
-      height: 36px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       border: 2px solid #b17bff;
       box-shadow: 0 0 0 2px #1243d2;
@@ -2052,7 +2052,15 @@
           // Woche 1 jeder Saison startet ohne Handicap.
           // Ab Woche 2 zählt die Platzierung der aktuellen Fahrwoche nach Rohpunkten.
           const referenceRank = weekIndex === 0 ? null : currentWeekRankByPlayerId.get(player.id);
-          const multiplier = referenceRank ? getHandicapMultiplier(referenceRank) : 1.00;
+          const handicapEnabled =
+          seasonKey === "q3-2026" ||
+          seasonKey === "q4-2026" ||
+          /^q[1-4]-(202[7-9]|20[3-9][0-9])$/.test(seasonKey);
+
+        const multiplier =
+          handicapEnabled && referenceRank
+            ? getHandicapMultiplier(referenceRank)
+            : 1.00;
           const adjustedScore = Math.round(rawScore * multiplier);
           const handicapScore = adjustedScore - rawScore;
 
