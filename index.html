@@ -1654,7 +1654,8 @@
         </table>
       </div>
       <div class="handicap-explain">
-        <strong>Multiplikator:</strong> Woche 1 läuft ohne Handicap. Ab Woche 2 wird der Faktor nach der aktuellen Wochenplatzierung der Fahrpunkte berechnet: Platz 1–3 = 0,90x · 4–6 = 1,00x · 7–10 = 1,10x · 11–15 = 1,20x · 16–19 = 1,30x. <strong>HCP</strong> zeigt den Punktegewinn/-verlust der Woche, <strong>HCP ges.</strong> die kumulierte Summe.
+        <strong>Multiplikator:</strong> Woche 1 läuft ohne Handicap. Ab Woche 2 wird der Faktor nach der aktuellen Wochenplatzierung der Fahrpunkte berechnet:
+        <br> Platz 1–3 = 0,90x · 4–6 = 1,00x · 7–10 = 1,10x · 11–15 = 1,20x · 16–19 = 1,30x.<br> <strong>HCP</strong> zeigt den Punktegewinn/-verlust der Woche, <strong>HCP ges.</strong> die kumulierte Summe.
       </div>
     </section>
 
@@ -2732,6 +2733,69 @@
       return calendarYearRanking(year).slice(0, 3);
     }
 
+    function previousSeasonKey(seasonKey) {
+      const match = /^q(\d)-(\d{4})$/.exec(seasonKey || "");
+      if (!match) return null;
+      let quarter = Number(match[1]);
+      let year = Number(match[2]);
+      quarter -= 1;
+      if (quarter < 1) {
+        quarter = 4;
+        year -= 1;
+      }
+      return `q${quarter}-${year}`;
+    }
+
+    function finalSeasonRankingFromData(players) {
+      return (players || [])
+        .map((p) => ({
+          ...p,
+          seasonTotal: p.total || 0,
+          seasonRawTotal: p.rawTotal || 0
+        }))
+        .filter((p) => p.seasonTotal > 0)
+        .sort((a, b) => b.seasonTotal - a.seasonTotal || b.seasonRawTotal - a.seasonRawTotal || a.name.localeCompare(b.name))
+        .map((p, idx) => ({ ...p, seasonRank: idx + 1 }));
+    }
+
+    function mostImprovedVsPreviousSeason(weekIndex) {
+      const prevKey = previousSeasonKey(state.selectedSeasonKey);
+      if (!prevKey) return null;
+
+      const hasPreviousSeason = state.allTournamentRows.some((row) => {
+        const game = normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d");
+        const date = row.datum || row.date || "";
+        return game === state.selectedGame && seasonKeyFromDate(date) === prevKey;
+      });
+      if (!hasPreviousSeason) return null;
+
+      const previousData = buildData(state.allPlayerRows, state.allTournamentRows, prevKey, state.selectedGame);
+      const previousRanking = finalSeasonRankingFromData(previousData.players);
+      if (!previousRanking.length) return null;
+
+      const previousRankById = new Map(previousRanking.map((p) => [p.id, p.seasonRank]));
+      const currentRanking = rankByWeek(weekIndex);
+
+      const candidates = currentRanking
+        .map((p) => {
+          const previousRank = previousRankById.get(p.id);
+          if (!previousRank) return null;
+          const rankGain = previousRank - p.rank;
+          return {
+            ...p,
+            previousSeasonKey: prevKey,
+            previousSeasonLabel: seasonLabelFromKey(prevKey),
+            previousRank,
+            currentRank: p.rank,
+            rankGain
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.rankGain - a.rankGain || a.currentRank - b.currentRank || a.name.localeCompare(b.name));
+
+      return candidates[0] || null;
+    }
+
     function gapTextForRankingEntry(entry) {
       if (!entry) return "Keine Daten";
       if (entry.yearRank >= 1 && entry.yearRank <= 3) {
@@ -2852,6 +2916,7 @@
         .map((p) => ({ ...p, recent: p.weekScores.slice(start, weekIndex + 1).reduce((a, b) => a + b, 0) }))
         .sort((a, b) => b.recent - a.recent || a.rank - b.rank)[0];
       const monthDriver = driverOfMonth(weekIndex);
+      const improvedVsPreviousSeason = mostImprovedVsPreviousSeason(weekIndex);
       const participation = participationStats(weekIndex);
       const reportYear = weekData.year || parseYear(state.selectedSeasonKey) || new Date().getFullYear();
       const yearTopThree = calendarYearTopThree(reportYear);
@@ -2902,6 +2967,15 @@
             label: "🏆 Fahrer des Monats",
             value: monthDriver ? displayName(monthDriver) : "-",
             sub: monthDriver ? `${monthDriver.monthPoints.toLocaleString("de-DE")} Punkte im ${monthDriver.monthLabel} · ${monthDriver.monthStarts} Starts` : "Keine Monatsdaten"
+          },
+          {
+            label: "🚀 Beste Entwicklung",
+            value: improvedVsPreviousSeason && improvedVsPreviousSeason.rankGain > 0 ? displayName(improvedVsPreviousSeason) : "Keine Verbesserung",
+            sub: improvedVsPreviousSeason
+              ? (improvedVsPreviousSeason.rankGain > 0
+                ? `+${improvedVsPreviousSeason.rankGain} Plätze vs. ${improvedVsPreviousSeason.previousSeasonLabel} · vorher Rang ${improvedVsPreviousSeason.previousRank}, jetzt Rang ${improvedVsPreviousSeason.currentRank}`
+                : `Keine bessere Platzierung vs. ${improvedVsPreviousSeason.previousSeasonLabel}`)
+              : "Keine Vorsaison-Daten"
           },
           {
             label: "📈 Aufsteiger",
