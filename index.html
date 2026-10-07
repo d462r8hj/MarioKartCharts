@@ -1589,6 +1589,51 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(240,252,255,0.92));
     }
 
+
+
+    /* Q4: eigener Winter-/Offroad-Reifen ohne externe Bilddatei */
+    .season-tire-q4 {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(from 0deg, #20263d 0deg 8deg, #6a39ff 8deg 14deg, #161a2a 14deg 22deg);
+      border: 3px solid #13172a;
+      box-shadow: inset 0 0 0 5px #343b59, inset 0 0 0 11px #181c30, 0 3px 8px rgba(0, 0, 0, 0.38);
+      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .season-tire-q4::before {
+      content: "";
+      position: absolute;
+      inset: 13px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #eef1ff 0 18%, transparent 19%),
+        conic-gradient(#c4cbec 0deg 30deg, #727baf 30deg 60deg, #c4cbec 60deg 90deg, #727baf 90deg 120deg, #c4cbec 120deg 150deg, #727baf 150deg 180deg, #c4cbec 180deg 210deg, #727baf 210deg 240deg, #c4cbec 240deg 270deg, #727baf 270deg 300deg, #c4cbec 300deg 330deg, #727baf 330deg 360deg);
+      border: 2px solid #e5e8ff;
+      box-shadow: 0 0 0 2px #4e5685;
+    }
+
+    .season-tire-q4::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0 25%, #8c4dff 28% 65%, #292f52 68%);
+      box-shadow: 0 0 6px rgba(177, 123, 255, 0.85);
+    }
+
+    .season-btn.season-q4[aria-pressed="true"] .season-tire-q4 {
+      transform: rotate(16deg) scale(1.08);
+      filter: saturate(1.4) brightness(1.1);
+      box-shadow: inset 0 0 0 5px #555e88, inset 0 0 0 11px #181c30, 0 0 14px rgba(177, 123, 255, 0.95);
+    }
+
+    .season-btn.season-q4:hover .season-tire-q4 {
+      transform: rotate(12deg);
+    }
+
   </style>
 </head>
 <body class="game-mk8d">
@@ -2460,6 +2505,19 @@
             });
           }
         });
+
+      // Q4 2026 auch ohne vorhandene Turnierzeile anzeigen.
+      const q4Key = "q4-2026";
+      if (!seasonMap.has(q4Key)) {
+        seasonMap.set(q4Key, {
+          key: q4Key,
+          label: "Q4 2026",
+          icon: "",
+          startTimestamp: seasonStartTimestamp(q4Key),
+          empty: true
+        });
+      }
+
       return Array.from(seasonMap.values()).sort((a, b) => a.startTimestamp - b.startTimestamp);
     }
 
@@ -2474,13 +2532,21 @@
         button.setAttribute("aria-pressed", season.key === state.selectedSeasonKey ? "true" : "false");
         button.title = season.label;
 
-        if (season.icon) {
+        const quarterKey = season.key.split("-")[0];
+        if (quarterKey === "q4") {
+          const tire = document.createElement("span");
+          tire.className = "season-tire-q4";
+          tire.setAttribute("aria-hidden", "true");
+          button.appendChild(tire);
+        } else if (season.icon) {
           const img = document.createElement("img");
           img.src = season.icon;
           img.alt = season.label;
           button.appendChild(img);
         } else {
-          button.textContent = season.label;
+          const fallbackLabel = document.createElement("span");
+          fallbackLabel.textContent = seasonButtonLabelFromKey(season.key);
+          button.appendChild(fallbackLabel);
         }
 
         const badge = document.createElement("span");
@@ -2492,8 +2558,10 @@
           if (season.key === state.selectedSeasonKey) return;
           applySeason(season.key);
           populateSeasonButtons();
-          render();
-          enrichAvatars();
+          if (state.players.length && state.weekColumns.length) {
+            render();
+            enrichAvatars();
+          }
           updateSeasonEndCountdown();
         });
         el.seasonSwitch.appendChild(button);
@@ -2508,9 +2576,37 @@
       state.selectedSeasonLabel = state.availableSeasons.find((season) => season.key === seasonKey)?.label || seasonKey;
 
       if (!state.players.length || !state.weekColumns.length) {
-        throw new Error(`Keine gültigen Turnierdaten für ${state.selectedSeasonLabel} gefunden.`);
+        state.selectedWeekIndex = 0;
+        el.slider.min = "0";
+        el.slider.max = "0";
+        el.slider.value = "0";
+        el.slider.disabled = true;
+        el.weekLabel.textContent = `${state.selectedSeasonLabel} · noch keine Turniere`;
+
+        const gameLabel = GAME_CONFIG[state.selectedGame]?.label || state.selectedGame;
+        el.meta.textContent = `${gameLabel} · ${state.selectedSeasonLabel} · Saison vorbereitet · noch keine Turnierdaten`;
+        clearVisuals();
+
+        const titleEl = document.getElementById("tableTitle");
+        if (titleEl) titleEl.textContent = `Tabelle – ${state.selectedSeasonLabel}`;
+        if (el.reportTitle) el.reportTitle.textContent = `Wöchentlicher Spielbericht – ${state.selectedSeasonLabel}`;
+        if (el.reportText) {
+          el.reportText.textContent = `Für ${state.selectedSeasonLabel} wurden noch keine Turnierergebnisse eingetragen. Sobald die ersten Ergebnisse in turniere.csv vorhanden sind, wird die Rangliste automatisch aufgebaut.`;
+        }
+        if (el.highlightsGrid) {
+          el.highlightsGrid.innerHTML = `
+            <article class="highlight-tile">
+              <div class="highlight-label">🏁 Saisonstatus</div>
+              <div class="highlight-value">Startbereit</div>
+              <div class="highlight-sub">Noch keine Ergebnisse für ${state.selectedSeasonLabel}</div>
+            </article>
+          `;
+        }
+        if (el.annualRankingTitle) el.annualRankingTitle.textContent = "Jahreswertung Top 3 · 2026";
+        return;
       }
 
+      el.slider.disabled = false;
       state.selectedWeekIndex = state.weekColumns.length - 1;
       el.slider.min = "0";
       el.slider.max = String(state.weekColumns.length - 1);
@@ -2547,9 +2643,7 @@
     function applyGameSelection(gameKey) {
       state.selectedGame = gameKey;
       setGameUi(gameKey);
-
       state.availableSeasons = seasonsForGame(gameKey);
-      populateSeasonButtons();
 
       if (!state.availableSeasons.length) {
         clearVisuals();
@@ -2560,24 +2654,23 @@
       }
 
       el.error.hidden = true;
-      
-      // Try to select the current season, otherwise fall back to the latest available
       const currentSeason = currentSeasonKey();
       const currentSeasonAvailable = state.availableSeasons.some((season) => season.key === currentSeason);
-      
+
       if (currentSeasonAvailable && !state.selectedSeasonKey) {
         state.selectedSeasonKey = currentSeason;
       } else if (state.availableSeasons.some((season) => season.key === state.selectedSeasonKey)) {
-        // Keep current selection if it's still available
+        // Auswahl beibehalten.
       } else {
-        // Fall back to the latest available season
         state.selectedSeasonKey = state.availableSeasons[state.availableSeasons.length - 1].key;
       }
 
       applySeason(state.selectedSeasonKey);
       populateSeasonButtons();
-      render();
-      enrichAvatars();
+      if (state.players.length && state.weekColumns.length) {
+        render();
+        enrichAvatars();
+      }
       updateTournamentCountdown();
       updateSeasonEndCountdown();
     }
