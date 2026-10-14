@@ -1086,8 +1086,8 @@
     /* Final-Anpassung: ausgewählte Saison farblich hervorheben und Spieler-Spalte halbieren. */
     .season-btn.season-q1 { --season-accent: #48b84f; --season-accent-2: #b8f26d; }
     .season-btn.season-q2 { --season-accent: #f0b300; --season-accent-2: #ffe066; }
-    .season-btn.season-q3 { --season-accent: #28a8ff; --season-accent-2: #7ee7ff; }
-    .season-btn.season-q4 { --season-accent: #6a39ff; --season-accent-2: #c08cff; }
+    .season-btn.season-q3 { --season-accent: #d9402a; --season-accent-2: #ff9a6e; }
+    .season-btn.season-q4 { --season-accent: #2f6fff; --season-accent-2: #9fd9ff; }
 
     .season-btn[aria-pressed="true"],
     .hero-controls .season-btn[aria-pressed="true"] {
@@ -1589,51 +1589,6 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(240,252,255,0.92));
     }
 
-
-
-    /* Q4: eigener Winter-/Offroad-Reifen ohne externe Bilddatei */
-    .season-tire-q4 {
-      position: relative;
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: repeating-conic-gradient(from 0deg, #20263d 0deg 8deg, #6a39ff 8deg 14deg, #161a2a 14deg 22deg);
-      border: 3px solid #13172a;
-      box-shadow: inset 0 0 0 5px #343b59, inset 0 0 0 11px #181c30, 0 3px 8px rgba(0, 0, 0, 0.38);
-      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .season-tire-q4::before {
-      content: "";
-      position: absolute;
-      inset: 13px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at center, #eef1ff 0 18%, transparent 19%),
-        conic-gradient(#c4cbec 0deg 30deg, #727baf 30deg 60deg, #c4cbec 60deg 90deg, #727baf 90deg 120deg, #c4cbec 120deg 150deg, #727baf 150deg 180deg, #c4cbec 180deg 210deg, #727baf 210deg 240deg, #c4cbec 240deg 270deg, #727baf 270deg 300deg, #c4cbec 300deg 330deg, #727baf 330deg 360deg);
-      border: 2px solid #e5e8ff;
-      box-shadow: 0 0 0 2px #4e5685;
-    }
-
-    .season-tire-q4::after {
-      content: "";
-      position: absolute;
-      inset: 20px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #ffffff 0 25%, #8c4dff 28% 65%, #292f52 68%);
-      box-shadow: 0 0 6px rgba(177, 123, 255, 0.85);
-    }
-
-    .season-btn.season-q4[aria-pressed="true"] .season-tire-q4 {
-      transform: rotate(16deg) scale(1.08);
-      filter: saturate(1.4) brightness(1.1);
-      box-shadow: inset 0 0 0 5px #555e88, inset 0 0 0 11px #181c30, 0 0 14px rgba(177, 123, 255, 0.95);
-    }
-
-    .season-btn.season-q4:hover .season-tire-q4 {
-      transform: rotate(12deg);
-    }
-
   </style>
 </head>
 <body class="game-mk8d">
@@ -1897,7 +1852,7 @@
     }
 
     function parseDelimited(text) {
-      const rows = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+      const rows = text.replace(/^﻿/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
       const lines = rows.filter((line) => line.trim().length > 0);
       if (!lines.length) return [];
 
@@ -2065,7 +2020,7 @@
       const quarter = Number(match[1]);
       const year = Number(match[2]);
       const monthEnd = quarter * 3;
-      
+
       // Get the last day of the quarter month
       const date = new Date(Date.UTC(year, monthEnd, 0)); // Day 0 = last day of previous month
       return date;
@@ -2073,24 +2028,24 @@
 
     function countRemainingTournamentDays(seasonKey, gameKey) {
       if (!seasonKey || !gameKey) return 0;
-      
+
       const gameCfg = GAME_CONFIG[gameKey] || GAME_CONFIG.mk8d;
       const targetWeekday = gameCfg.weekday; // 3 = Mittwoch, 7 = Sonntag
-      
+
       const berlin = getBerlinNowParts(new Date());
       const today = new Date(new Date().toISOString().slice(0, 10));
-      
+
       const seasonEndDate = getSeasonEndDate(seasonKey);
       if (!seasonEndDate) return 0;
-      
+
       let count = 0;
       let currentDate = new Date(today);
-      
+
       // Count all occurrences of the target weekday from today until season end
       while (currentDate <= seasonEndDate) {
         const dayOfWeek = currentDate.getDay();
         const isoWeekday = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert JS weekday (0-6) to ISO (1-7)
-        
+
         if (isoWeekday === targetWeekday) {
           // If it's today, only count if the tournament hasn't started yet
           if (currentDate.getTime() === today.getTime()) {
@@ -2103,10 +2058,10 @@
             count++;
           }
         }
-        
+
         currentDate.setDate(currentDate.getDate() + 1);
       }
-      
+
       return count;
     }
 
@@ -2119,14 +2074,14 @@
 
       const now = new Date();
       const nowMs = now.getTime();
-      
+
       const seasonEndDate = getSeasonEndDate(state.selectedSeasonKey);
       if (!seasonEndDate) {
         el.seasonEndBanner.textContent = "Saisonende ungültig";
         el.remainingTournamentsBanner.textContent = "Turniertage: -";
         return;
       }
-      
+
       // Set to end of day (23:59:59) in Berlin timezone
       const endOfDayMs = zonedDateTimeToUtcMs(
         seasonEndDate.getUTCFullYear(),
@@ -2135,12 +2090,12 @@
         23, 59, 59,
         "Europe/Berlin"
       );
-      
+
       const remaining = formatDuration(endOfDayMs - nowMs);
       const seasonLabel = seasonLabelFromKey(state.selectedSeasonKey);
       const endDateStr = seasonEndDate.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
       el.seasonEndBanner.textContent = `Saison ${seasonLabel} endet ${endDateStr} · in ${remaining}`;
-      
+
       // Update remaining tournament days
       const remainingDays = countRemainingTournamentDays(state.selectedSeasonKey, state.selectedGame);
       el.remainingTournamentsBanner.textContent = `${remainingDays} Turniertag${remainingDays !== 1 ? "e" : ""} verbleibend`;
@@ -2472,7 +2427,7 @@
       } else if (quarter === "3") {
         return "https://static.wikia.nocookie.net/mario-kart/images/7/79/MK8_Sprite_Klein-Reifen.png/revision/latest?cb=20150206124842&path-prefix=de";
       } else if (quarter === "4") {
-        return "https://static.wikia.nocookie.net/mario-kart/images/7/79/MK8_Sprite_Klein-Reifen.png/revision/latest?cb=20150206124842&path-prefix=de";
+        return "https://static.wikia.nocookie.net/mario-kart/images/7/7f/MK8_Sprite_Standard-Reifen_%28Blau%29.png/revision/latest?cb=20150206123154&path-prefix=de";
       }
       return "";
     }
@@ -2512,7 +2467,7 @@
         seasonMap.set(q4Key, {
           key: q4Key,
           label: "Q4 2026",
-          icon: "",
+          icon: seasonIconFromKey(q4Key),
           startTimestamp: seasonStartTimestamp(q4Key),
           empty: true
         });
@@ -2532,13 +2487,7 @@
         button.setAttribute("aria-pressed", season.key === state.selectedSeasonKey ? "true" : "false");
         button.title = season.label;
 
-        const quarterKey = season.key.split("-")[0];
-        if (quarterKey === "q4") {
-          const tire = document.createElement("span");
-          tire.className = "season-tire-q4";
-          tire.setAttribute("aria-hidden", "true");
-          button.appendChild(tire);
-        } else if (season.icon) {
+        if (season.icon) {
           const img = document.createElement("img");
           img.src = season.icon;
           img.alt = season.label;
@@ -3150,11 +3099,11 @@
       if (weekIndex > 0) rankByWeek(weekIndex - 1).forEach((p) => prevMap.set(p.id, p.rank));
 
       el.leaderboardBody.innerHTML = "";
-      
+
       // Only apply medal colors if the season is finished (not the current season)
       const currentSeason = currentSeasonKey();
       const isCurrentSeason = state.selectedSeasonKey === currentSeason;
-      
+
       current.forEach((p) => {
         const prevRank = prevMap.get(p.id) ?? p.rank;
         const delta = prevRank - p.rank;
@@ -3429,7 +3378,7 @@
           updateTournamentCountdown();
           updateSeasonEndCountdown();
         };
-        
+
         updateCountdowns();
         setInterval(updateCountdowns, 1000);
       } catch (err) {
