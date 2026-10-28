@@ -1312,30 +1312,57 @@
 
     .leaderboard-table th:nth-child(2),
     .leaderboard-table td:nth-child(2) {
-      width: 210px !important;
-      min-width: 210px !important;
-      max-width: 210px !important;
+      width: 196px !important;
+      min-width: 196px !important;
+      max-width: 196px !important;
       text-align: left;
       padding-left: 8px;
       padding-right: 8px;
     }
 
+    /* Spalten etwas schmaler, damit die Abstand-Spalte ohne Mehrbreite Platz hat. */
     .leaderboard-table th:nth-child(3),
     .leaderboard-table td:nth-child(3) { width: 98px !important; }
     .leaderboard-table th:nth-child(4),
-    .leaderboard-table td:nth-child(4) { width: 124px !important; }
+    .leaderboard-table td:nth-child(4) { width: 112px !important; }
     .leaderboard-table th:nth-child(5),
-    .leaderboard-table td:nth-child(5) { width: 104px !important; }
+    .leaderboard-table td:nth-child(5) { width: 90px !important; }
     .leaderboard-table th:nth-child(6),
-    .leaderboard-table td:nth-child(6) { width: 104px !important; }
+    .leaderboard-table td:nth-child(6) { width: 96px !important; }
     .leaderboard-table th:nth-child(7),
     .leaderboard-table td:nth-child(7) { width: 104px !important; }
     .leaderboard-table th:nth-child(8),
-    .leaderboard-table td:nth-child(8) { width: 110px !important; }
+    .leaderboard-table td:nth-child(8) { width: 84px !important; }
     .leaderboard-table th:nth-child(9),
-    .leaderboard-table td:nth-child(9) { width: 118px !important; }
+    .leaderboard-table td:nth-child(9) { width: 100px !important; }
     .leaderboard-table th:nth-child(10),
-    .leaderboard-table td:nth-child(10) { width: 78px !important; }
+    .leaderboard-table td:nth-child(10) { width: 106px !important; }
+    .leaderboard-table th:nth-child(11),
+    .leaderboard-table td:nth-child(11) { width: 64px !important; }
+
+    /* Abstand zum Platz davor (▲) und dahinter (▼), zweizeilig für schmale Spalte. */
+    .gap-cell {
+      display: inline-grid;
+      justify-items: end;
+      gap: 1px;
+      font-size: 0.78rem;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .gap-ahead { color: #cf3b3b; }
+    .gap-behind { color: #1d9f55; }
+    .gap-none { color: var(--muted); font-weight: 600; }
+
+    @media (max-width: 620px) {
+      .gap-cell {
+        display: inline-flex;
+        justify-content: flex-end;
+        gap: 10px;
+        font-size: 0.88rem;
+      }
+    }
 
     .leaderboard-table td.num,
     .leaderboard-table th.num {
@@ -1729,6 +1756,51 @@
       .start-lights span:nth-child(3) { animation: none; }
     }
 
+    /* Jahres-Umschalter über den Saison-Reifen */
+    .season-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .hero-controls .season-head .season-controls-label {
+      margin-bottom: 0;
+    }
+
+    .year-switch {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(8, 6, 30, 0.4);
+      overflow: hidden;
+    }
+
+    .year-switch[hidden] { display: none; }
+
+    .year-btn {
+      border: 0;
+      background: transparent;
+      color: #fff;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .year-btn[aria-pressed="true"] {
+      background: #ffd400;
+      color: #172047;
+    }
+
+    body.game-mkworld .year-btn[aria-pressed="true"] {
+      background: linear-gradient(120deg, rgba(116, 244, 255, 0.5), rgba(71, 155, 255, 0.6));
+      color: #fff;
+    }
+
     @media (max-width: 620px) {
       .hero { padding-top: 26px; }
       .start-lights { justify-self: start; }
@@ -1760,7 +1832,10 @@
         </div>
         <div class="hero-controls">
           <div class="season-controls">
-            <label class="season-controls-label">Saison</label>
+            <div class="season-head">
+              <label class="season-controls-label">Saison</label>
+              <div id="yearSwitch" class="year-switch" role="tablist" aria-label="Jahr auswählen"></div>
+            </div>
             <div id="seasonSwitch" class="season-switch" role="tablist" aria-label="Saison auswählen"></div>
           </div>
           <div class="week-controls">
@@ -1791,6 +1866,7 @@
               <th class="num">HCP</th>
               <th class="num">Gewertet</th>
               <th class="num">Gesamt</th>
+              <th class="num" title="Punkte Rückstand auf den Platz davor (▲) und Vorsprung auf den Platz dahinter (▼)">Abstand</th>
               <th class="num">HCP ges.</th>
               <th class="num">Ohne HCP</th>
               <th class="num">Trend</th>
@@ -1927,6 +2003,7 @@
     const el = {
       slider: document.getElementById("weekSlider"),
       seasonSwitch: document.getElementById("seasonSwitch"),
+      yearSwitch: document.getElementById("yearSwitch"),
       weekLabel: document.getElementById("weekLabel"),
       leaderboardBody: document.getElementById("leaderboardBody"),
       meta: document.getElementById("dataMeta"),
@@ -2674,10 +2751,52 @@
       return Array.from(seasonMap.values()).sort((a, b) => a.startTimestamp - b.startTimestamp);
     }
 
+    function selectSeason(seasonKey) {
+      applySeason(seasonKey);
+      populateSeasonButtons();
+      if (state.players.length && state.weekColumns.length) {
+        render();
+        enrichAvatars();
+      }
+      updateSeasonEndCountdown();
+    }
+
+    // Beim Jahreswechsel: aktuelle Saison, sonst letzte bereits gestartete, sonst erste Saison des Jahres.
+    function defaultSeasonForYear(year) {
+      const seasons = state.availableSeasons.filter((s) => parseYear(s.key) === year);
+      if (!seasons.length) return null;
+      const current = seasons.find((s) => s.key === currentSeasonKey());
+      const started = seasons.filter((s) => !isUpcomingSeason(s.key));
+      return (current || started[started.length - 1] || seasons[0]).key;
+    }
+
+    function populateYearButtons(selectedYear) {
+      if (!el.yearSwitch) return;
+      el.yearSwitch.innerHTML = "";
+      const years = Array.from(new Set(state.availableSeasons.map((s) => parseYear(s.key)).filter(Boolean))).sort((a, b) => a - b);
+      el.yearSwitch.hidden = years.length < 2;
+      years.forEach((year) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "year-btn";
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-pressed", year === selectedYear ? "true" : "false");
+        button.textContent = String(year);
+        button.addEventListener("click", () => {
+          if (year === selectedYear) return;
+          const key = defaultSeasonForYear(year);
+          if (key) selectSeason(key);
+        });
+        el.yearSwitch.appendChild(button);
+      });
+    }
+
     function populateSeasonButtons() {
       el.seasonSwitch.innerHTML = "";
       const currentKey = currentSeasonKey();
-      state.availableSeasons.forEach((season) => {
+      const selectedYear = parseYear(state.selectedSeasonKey);
+      populateYearButtons(selectedYear);
+      state.availableSeasons.filter((season) => parseYear(season.key) === selectedYear).forEach((season) => {
         const button = document.createElement("button");
         button.type = "button";
         button.className = `season-btn season-${season.key.split("-")[0]}`;
@@ -2705,13 +2824,7 @@
 
         button.addEventListener("click", () => {
           if (season.key === state.selectedSeasonKey) return;
-          applySeason(season.key);
-          populateSeasonButtons();
-          if (state.players.length && state.weekColumns.length) {
-            render();
-            enrichAvatars();
-          }
-          updateSeasonEndCountdown();
+          selectSeason(season.key);
         });
         el.seasonSwitch.appendChild(button);
       });
@@ -3304,9 +3417,17 @@
       const currentSeason = currentSeasonKey();
       const isCurrentSeason = state.selectedSeasonKey === currentSeason;
 
-      current.forEach((p) => {
+      current.forEach((p, idx) => {
         const prevRank = prevMap.get(p.id) ?? p.rank;
         const delta = prevRank - p.rank;
+        const ahead = current[idx - 1];
+        const behind = current[idx + 1];
+        const gapAhead = ahead
+          ? `<span class="gap-ahead" title="Rückstand auf Platz ${ahead.rank}">▲ ${(ahead.pointsTotal - p.pointsTotal).toLocaleString("de-DE")}</span>`
+          : `<span class="gap-none">▲ –</span>`;
+        const gapBehind = behind
+          ? `<span class="gap-behind" title="Vorsprung auf Platz ${behind.rank}">▼ ${(p.pointsTotal - behind.pointsTotal).toLocaleString("de-DE")}</span>`
+          : `<span class="gap-none">▼ –</span>`;
         const tr = document.createElement("tr");
         if (!isCurrentSeason) {
           if (p.rank === 1) tr.classList.add("rank-1");
@@ -3335,6 +3456,7 @@
           <td class="num ${handicapClass(p.handicapPointsWeek)}" data-label="Handicap">${p.handicapPointsWeek > 0 ? "+" : ""}${p.handicapPointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gewertet">${p.pointsWeek.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Gesamt">${p.pointsTotal.toLocaleString("de-DE")}</td>
+          <td class="num" data-label="Abstand"><span class="gap-cell">${gapAhead}${gapBehind}</span></td>
           <td class="num ${handicapClass(p.handicapPointsTotal)}" data-label="HCP gesamt">${p.handicapPointsTotal > 0 ? "+" : ""}${p.handicapPointsTotal.toLocaleString("de-DE")}</td>
           <td class="num" data-label="Ohne HCP">${p.rawRank}.<small class="raw-rank-sub">${p.rawPointsTotal.toLocaleString("de-DE")} Pkt.</small></td>
           <td class="num ${trendClass(delta)}" data-label="Trend">${delta > 0 ? "+" : ""}${delta}</td>
