@@ -1589,6 +1589,151 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(240,252,255,0.92));
     }
 
+
+    /* Mario-Kart-Look: Rainbow-Road-Nachthimmel, Zielflagge, Startampel und Logo-Titel. */
+    .season-badge.upcoming {
+      background: #ffd400;
+      color: #172047;
+    }
+
+    body.game-mk8d {
+      background:
+        radial-gradient(ellipse at 50% 118%, rgba(255, 212, 0, 0.22), transparent 46%),
+        radial-gradient(circle at 12% 12%, rgba(47, 87, 255, 0.32), transparent 30%),
+        radial-gradient(circle at 88% 6%, rgba(229, 37, 33, 0.22), transparent 28%),
+        linear-gradient(170deg, #050318 0%, #12093a 48%, #1d0b45 100%);
+    }
+
+    /* Sterne statt Karomuster */
+    body.game-mk8d::before {
+      opacity: 0.55;
+      background-image:
+        radial-gradient(1.4px 1.4px at 22px 34px, #fff, transparent),
+        radial-gradient(1px 1px at 118px 82px, #fff, transparent),
+        radial-gradient(1.6px 1.6px at 196px 18px, #ffe98a, transparent),
+        radial-gradient(1px 1px at 64px 150px, #fff, transparent),
+        radial-gradient(1.2px 1.2px at 172px 136px, #9fd9ff, transparent);
+      background-size: 230px 180px;
+      background-position: 0 0;
+    }
+
+    /* Rainbow Road quer über den Hintergrund */
+    body.game-mk8d::after {
+      content: "";
+      position: fixed;
+      left: -20vw;
+      right: -20vw;
+      bottom: 14vh;
+      height: 150px;
+      transform: rotate(-9deg);
+      background: linear-gradient(90deg, #e52521, #ff9a00, #ffd400, #43b047, #00b7ff, #2f57ff, #8c4dff, #e52521);
+      filter: blur(38px);
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Zielflaggen-Streifen oben im Kopfbereich */
+    .hero {
+      padding-top: 34px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 14px;
+      background: conic-gradient(#111 25%, #fff 0 50%, #111 0 75%, #fff 0) 0 0 / 14px 14px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    body.game-mk8d .hero {
+      background:
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0 2px, transparent 2px 38px),
+        radial-gradient(circle at 92% 120%, rgba(255, 212, 0, 0.35), transparent 40%),
+        linear-gradient(120deg, #e52521 0%, #b5179e 30%, #2f57ff 68%, #00b7ff 100%);
+      border: 2px solid rgba(255, 212, 0, 0.55);
+    }
+
+    body.game-mk8d .hero h1 {
+      font-family: "Arial Black", "Trebuchet MS", sans-serif;
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: #ffd400;
+      background: linear-gradient(180deg, #fff6a8 0%, #ffd400 45%, #ff9a00 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 2px 0 #9b0d0d) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+    }
+
+    /* Startampel vor den Terminen */
+    .start-lights {
+      display: inline-flex;
+      gap: 5px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #15172a;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .start-lights span {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #e52521;
+      box-shadow: 0 0 8px #e52521;
+    }
+
+    .start-lights span:nth-child(2) { background: #ffd400; box-shadow: 0 0 8px #ffd400; }
+    .start-lights span:nth-child(3) {
+      background: #43e05a;
+      box-shadow: 0 0 10px #43e05a;
+      animation: go-light 1.6s ease-in-out infinite;
+    }
+
+    @keyframes go-light {
+      50% { box-shadow: 0 0 2px #43e05a; opacity: 0.6; }
+    }
+
+    /* Termine als Zeittafeln */
+    .countdown::before {
+      content: attr(data-icon);
+      margin-right: 7px;
+    }
+
+    body.game-mk8d .countdown {
+      background: rgba(8, 6, 30, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-left: 4px solid #ffd400;
+      font-variant-numeric: tabular-nums;
+    }
+
+    body.game-mk8d .hero-dashboard {
+      background: rgba(8, 6, 30, 0.38);
+      border-color: rgba(255, 212, 0, 0.35);
+    }
+
+    body.game-mk8d .game-btn[aria-pressed="true"] {
+      background: #ffd400;
+      color: #172047;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .start-lights span:nth-child(3) { animation: none; }
+    }
+
+    @media (max-width: 620px) {
+      .hero { padding-top: 26px; }
+      .start-lights { justify-self: start; }
+      body.game-mk8d::after { height: 100px; bottom: 8vh; }
+    }
   </style>
 </head>
 <body class="game-mk8d">
@@ -1602,9 +1747,10 @@
         </div>
       </div>
       <div class="countdown-container">
-        <div id="countdownBanner" class="countdown">Nächstes Turnier wird berechnet...</div>
-        <div id="seasonEndBanner" class="countdown">Saisonende wird berechnet...</div>
-        <div id="remainingTournamentsBanner" class="countdown">Verbl. Turniertage wird berechnet...</div>
+        <div class="start-lights" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div id="countdownBanner" class="countdown" data-icon="🏁">Nächstes Turnier wird berechnet...</div>
+        <div id="seasonEndBanner" class="countdown" data-icon="🏆">Saisonende wird berechnet...</div>
+        <div id="remainingTournamentsBanner" class="countdown" data-icon="📅">Verbl. Turniertage wird berechnet...</div>
       </div>
 
       <div class="hero-dashboard">
@@ -2043,7 +2189,8 @@
       if (!seasonEndDate) return 0;
 
       let count = 0;
-      let currentDate = new Date(today);
+      // Kommende Saisons erst ab ihrem Starttag zählen.
+      let currentDate = new Date(Math.max(today.getTime(), seasonStartTimestamp(seasonKey)));
 
       // Count all occurrences of the target weekday from today until season end
       while (currentDate <= seasonEndDate) {
@@ -2095,14 +2242,25 @@
         "Europe/Berlin"
       );
 
-      const remaining = formatDuration(endOfDayMs - nowMs);
       const seasonLabel = seasonLabelFromKey(state.selectedSeasonKey);
+      const remainingDays = countRemainingTournamentDays(state.selectedSeasonKey, state.selectedGame);
+      const dayWord = `Turniertag${remainingDays !== 1 ? "e" : ""}`;
+
+      if (isUpcomingSeason(state.selectedSeasonKey)) {
+        const start = new Date(seasonStartTimestamp(state.selectedSeasonKey));
+        const startMs = zonedDateTimeToUtcMs(start.getUTCFullYear(), start.getUTCMonth() + 1, start.getUTCDate(), 0, 0, 0, "Europe/Berlin");
+        const startDateStr = start.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+        el.seasonEndBanner.textContent = `Saison ${seasonLabel} startet ${startDateStr} · in ${formatDuration(startMs - nowMs)}`;
+        el.remainingTournamentsBanner.textContent = `${remainingDays} ${dayWord} geplant`;
+        return;
+      }
+
+      const remaining = formatDuration(endOfDayMs - nowMs);
       const endDateStr = seasonEndDate.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
       el.seasonEndBanner.textContent = `Saison ${seasonLabel} endet ${endDateStr} · in ${remaining}`;
 
       // Update remaining tournament days
-      const remainingDays = countRemainingTournamentDays(state.selectedSeasonKey, state.selectedGame);
-      el.remainingTournamentsBanner.textContent = `${remainingDays} Turniertag${remainingDays !== 1 ? "e" : ""} verbleibend`;
+      el.remainingTournamentsBanner.textContent = `${remainingDays} ${dayWord} verbleibend`;
     }
 
     function updateTournamentCountdown() {
@@ -2433,20 +2591,42 @@
       return { players, weekColumns, currentWeek, currentYear };
     }
 
+    // Reifen-Icons je Jahr und Quartal. Jahre ohne eigenen Eintrag nutzen das letzte frühere Jahr.
+    const SEASON_ICONS = {
+      2026: {
+        1: "https://static.wikia.nocookie.net/mario-kart/images/5/5c/MK8_Sprite_Blatt-Reifen.png/revision/latest/scale-to-width-down/80?cb=20151219191703&path-prefix=de",
+        2: "https://static.wikia.nocookie.net/mario-kart/images/a/ad/MK8_Sprite_Goldräder.png/revision/latest?cb=20150206125325&path-prefix=de",
+        3: "https://static.wikia.nocookie.net/mario-kart/images/7/79/MK8_Sprite_Klein-Reifen.png/revision/latest?cb=20150206124842&path-prefix=de",
+        4: "https://static.wikia.nocookie.net/mario-kart/images/7/7f/MK8_Sprite_Standard-Reifen_%28Blau%29.png/revision/latest?cb=20150206123154&path-prefix=de"
+      },
+      2027: {
+        1: "https://mario.wiki.gallery/images/4/4c/SpongeTiresMK8.png",       // Schwammreifen
+        2: "https://mario.wiki.gallery/images/d/d1/HotMonsterTiresMK8.png",   // Monster-Reifen (heiß)
+        3: "https://mario.wiki.gallery/images/7/71/CrimsonSlimTiresMK8.png",  // Klein-Reifen (rot)
+        4: "https://mario.wiki.gallery/images/f/fe/AzureRollerTiresMK8.png"   // Walzen (azur)
+      }
+    };
+
     function seasonIconFromKey(key) {
       const match = /^q(\d)-(\d{4})$/.exec(key);
       if (!match) return "";
-      const quarter = match[1];
-      if (quarter === "1") {
-        return "https://static.wikia.nocookie.net/mario-kart/images/5/5c/MK8_Sprite_Blatt-Reifen.png/revision/latest/scale-to-width-down/80?cb=20151219191703&path-prefix=de";
-      } else if (quarter === "2") {
-        return "https://static.wikia.nocookie.net/mario-kart/images/a/ad/MK8_Sprite_Goldräder.png/revision/latest?cb=20150206125325&path-prefix=de";
-      } else if (quarter === "3") {
-        return "https://static.wikia.nocookie.net/mario-kart/images/7/79/MK8_Sprite_Klein-Reifen.png/revision/latest?cb=20150206124842&path-prefix=de";
-      } else if (quarter === "4") {
-        return "https://static.wikia.nocookie.net/mario-kart/images/7/7f/MK8_Sprite_Standard-Reifen_%28Blau%29.png/revision/latest?cb=20150206123154&path-prefix=de";
-      }
-      return "";
+      const quarter = Number(match[1]);
+      const year = Number(match[2]);
+      const years = Object.keys(SEASON_ICONS).map(Number).sort((a, b) => a - b);
+      const iconYear = years.filter((y) => y <= year).pop() ?? years[0];
+      return SEASON_ICONS[iconYear]?.[quarter] || "";
+    }
+
+    function nextSeasonKey(seasonKey) {
+      const match = /^q(\d)-(\d{4})$/.exec(seasonKey || "");
+      if (!match) return null;
+      const quarter = Number(match[1]);
+      const year = Number(match[2]);
+      return quarter === 4 ? `q1-${year + 1}` : `q${quarter + 1}-${year}`;
+    }
+
+    function isUpcomingSeason(seasonKey) {
+      return seasonStartTimestamp(seasonKey) > Date.now();
     }
 
     function seasonBadgeText(key) {
@@ -2478,17 +2658,18 @@
           }
         });
 
-      // Q4 2026 auch ohne vorhandene Turnierzeile anzeigen.
-      const q4Key = "q4-2026";
-      if (!seasonMap.has(q4Key)) {
-        seasonMap.set(q4Key, {
-          key: q4Key,
-          label: "Q4 2026",
-          icon: seasonIconFromKey(q4Key),
-          startTimestamp: seasonStartTimestamp(q4Key),
+      // Aktuelle und nächste Saison auch ohne vorhandene Turnierzeile anzeigen (z. B. Q1 2027 vorbereiten).
+      const current = currentSeasonKey();
+      [current, nextSeasonKey(current)].filter(Boolean).forEach((key) => {
+        if (seasonMap.has(key)) return;
+        seasonMap.set(key, {
+          key,
+          label: seasonLabelFromKey(key),
+          icon: seasonIconFromKey(key),
+          startTimestamp: seasonStartTimestamp(key),
           empty: true
         });
-      }
+      });
 
       return Array.from(seasonMap.values()).sort((a, b) => a.startTimestamp - b.startTimestamp);
     }
@@ -2516,7 +2697,9 @@
         }
 
         const badge = document.createElement("span");
-        badge.className = `season-badge ${season.key === currentKey ? "current" : "past"}`;
+        const badgeState = season.key === currentKey ? "current" : (isUpcomingSeason(season.key) ? "upcoming" : "past");
+        badge.className = `season-badge ${badgeState}`;
+        if (badgeState === "upcoming") button.title = `${season.label} · in Vorbereitung`;
         badge.textContent = seasonBadgeText(season.key);
         button.appendChild(badge);
 
@@ -2568,7 +2751,7 @@
             </article>
           `;
         }
-        if (el.annualRankingTitle) el.annualRankingTitle.textContent = "Jahreswertung Top 3 · 2026";
+        if (el.annualRankingTitle) el.annualRankingTitle.textContent = `Jahreswertung Top 3 · ${parseYear(seasonKey) || new Date().getFullYear()}`;
         return;
       }
 
