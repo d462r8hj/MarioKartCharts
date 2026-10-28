@@ -1801,6 +1801,269 @@
       color: #fff;
     }
 
+    /* Seitliche Deko: Rennstrecke mit Items, nur in den Freiflächen neben dem Inhalt. */
+    .deco-sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .side-deco {
+      display: none;
+      --k: 0.72;
+    }
+
+    @media (min-width: 1400px) {
+      .side-deco { display: block; }
+    }
+
+    @media (min-width: 1680px) {
+      .side-deco { --k: 1; }
+    }
+
+    .side-deco .side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: calc((100vw - 1220px) / 2);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .side-deco .side-left { left: 0; }
+    .side-deco .side-right { right: 0; }
+
+    .side-deco .track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.55;
+    }
+
+    .side-deco .track path {
+      fill: none;
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: butt;
+    }
+
+    .side-deco .track-curb-base { stroke: #ffffff; stroke-width: 30px; }
+    .side-deco .track-curb { stroke: #e52521; stroke-width: 30px; stroke-dasharray: 12 12; }
+    .side-deco .track-road { stroke: #2b2e45; stroke-width: 22px; }
+    .side-deco .track-line { stroke: rgba(255, 255, 255, 0.85); stroke-width: 2px; stroke-dasharray: 14 16; }
+
+    .side-deco .deco {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: calc(var(--s) * var(--k) * 1px);
+      height: calc(var(--s) * var(--k) * 1px);
+      transform: translate(-50%, -50%) rotate(var(--r));
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+      animation: deco-float 7s ease-in-out infinite;
+      animation-delay: var(--d);
+    }
+
+    @keyframes deco-float {
+      0%, 100% { transform: translate(-50%, -50%) rotate(var(--r)); }
+      50% { transform: translate(-50%, calc(-50% - 7px)) rotate(var(--r)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .side-deco .deco { animation: none; }
+    }
+
+    /* Einheitliche Kachel-Raster: 3 Spalten statt Restzeilen mit Lücken. */
+    .highlights-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 760px) {
+      .highlights-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 359px) {
+      .highlights-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 420px) and (min-width: 360px) {
+      .highlights-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    /* Fahrerstatistik */
+    .stats-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 14px;
+      background:
+        linear-gradient(135deg, rgba(47, 87, 255, 0.07), rgba(140, 77, 255, 0.10)),
+        #ffffff;
+    }
+
+    body.game-mkworld .stats-body {
+      background:
+        linear-gradient(132deg, rgba(34, 137, 221, 0.12), rgba(0, 200, 180, 0.13)),
+        rgba(255, 255, 255, 0.92);
+    }
+
+    .stats-table-wrap {
+      padding: 0;
+      border: 1px solid #dbe4ff;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .stats-table {
+      min-width: 640px;
+      table-layout: fixed;
+      font-size: 0.9rem;
+    }
+
+    .stats-table th:nth-child(1), .stats-table td:nth-child(1) { width: 48px; text-align: center; }
+    .stats-table th:nth-child(2), .stats-table td:nth-child(2) { width: auto; }
+    .stats-table th:nth-child(n+3), .stats-table td:nth-child(n+3) { width: 92px; }
+    .stats-table th:nth-child(8), .stats-table td:nth-child(8) { width: 116px; }
+    .stats-table th.num { text-align: right; }
+
+    .stats-player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .stats-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 2px rgba(20, 23, 43, 0.08);
+    }
+
+    .stats-name {
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .form-spark {
+      display: inline-flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 3px;
+      height: 22px;
+      vertical-align: middle;
+    }
+
+    .form-bar {
+      width: 9px;
+      border-radius: 3px 3px 1px 1px;
+      opacity: 0.9;
+    }
+
+    .form-bar.is-missing {
+      height: 4px;
+      background: #d1d5db;
+    }
+
+    .stats-toggle {
+      justify-self: center;
+      border: 1px solid #bbc8ff;
+      border-radius: 999px;
+      background: #fff;
+      color: #24326f;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 7px 16px;
+      cursor: pointer;
+    }
+
+    .stats-toggle:hover { border-color: #8c4dff; }
+    .stats-card[hidden] { display: none; }
+    .stats-toggle[hidden] { display: none; }
+
+    .stats-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 760px) {
+      .stats-body { padding: 12px; gap: 12px; }
+    }
+
+    /* Handy: jede Zeile als kompakte Karte mit Kennzahlen nebeneinander */
+    @media (max-width: 620px) {
+      .stats-table-wrap { border: 0; background: transparent; overflow: visible; }
+      .stats-table,
+      .stats-table tbody,
+      .stats-table tr,
+      .stats-table td { display: block; }
+      .stats-table { min-width: 0; width: 100%; table-layout: auto; }
+      .stats-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+      .stats-table tbody tr {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        grid-template-areas:
+          "rank name"
+          "stats stats";
+        gap: 6px 8px;
+        margin: 0 0 8px;
+        padding: 10px;
+        border: 1px solid #dbe4ff;
+        border-radius: 12px;
+        background: #fff !important;
+      }
+      .stats-table tbody td {
+        border: 0;
+        padding: 0;
+        width: auto !important;
+        white-space: normal;
+      }
+      .stats-table tbody td:nth-child(1) { grid-area: rank; align-self: center; }
+      .stats-table tbody td:nth-child(2) { grid-area: name; align-self: center; }
+      .stats-table tbody tr { grid-auto-flow: row; }
+      .stats-table tbody td[data-label] {
+        display: inline-grid;
+        gap: 2px;
+        text-align: left;
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+      .stats-table tbody td[data-label]::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+      }
+      .stats-table tbody tr {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-areas:
+          "rank name name name name name"
+          "c3 c4 c5 c6 c7 c8";
+      }
+      .stats-table tbody td:nth-child(3) { grid-area: c3; }
+      .stats-table tbody td:nth-child(4) { grid-area: c4; }
+      .stats-table tbody td:nth-child(5) { grid-area: c5; }
+      .stats-table tbody td:nth-child(6) { grid-area: c6; }
+      .stats-table tbody td:nth-child(7) { grid-area: c7; }
+      .stats-table tbody td:nth-child(8) { grid-area: c8; }
+      .stats-table .form-spark { justify-content: flex-start; height: 18px; gap: 2px; }
+      .stats-table .form-bar { width: 6px; }
+    }
+
     @media (max-width: 620px) {
       .hero { padding-top: 26px; }
       .start-lights { justify-self: start; }
@@ -1809,6 +2072,103 @@
   </style>
 </head>
 <body class="game-mk8d">
+  <!-- Dezente Mario-Kart-Deko in den seitlichen Freiflächen (nur auf breiten Bildschirmen sichtbar). -->
+  <svg class="deco-sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-itembox" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff5bd6" />
+        <stop offset="0.35" stop-color="#ffd400" />
+        <stop offset="0.65" stop-color="#43e05a" />
+        <stop offset="1" stop-color="#00b7ff" />
+      </linearGradient>
+      <pattern id="p-checker" width="8" height="8" patternUnits="userSpaceOnUse">
+        <rect width="8" height="8" fill="#fff" />
+        <rect width="4" height="4" fill="#111" />
+        <rect x="4" y="4" width="4" height="4" fill="#111" />
+      </pattern>
+    </defs>
+    <symbol id="i-star" viewBox="0 0 64 64">
+      <polygon points="32,4 40,23 60,24 44,37 50,58 32,46 14,58 20,37 4,24 24,23" fill="#ffd400" stroke="#f08c00" stroke-width="3" stroke-linejoin="round" />
+      <ellipse cx="27" cy="30" rx="2.6" ry="5" fill="#111" />
+      <ellipse cx="37" cy="30" rx="2.6" ry="5" fill="#111" />
+    </symbol>
+    <symbol id="i-mushroom" viewBox="0 0 64 64">
+      <rect x="19" y="32" width="26" height="24" rx="9" fill="#f6e1b5" />
+      <path d="M6 36 C6 17 19 8 32 8 C45 8 58 17 58 36 Z" fill="#e52521" />
+      <circle cx="32" cy="18" r="6.5" fill="#fff" />
+      <circle cx="15" cy="29" r="5" fill="#fff" />
+      <circle cx="49" cy="29" r="5" fill="#fff" />
+      <ellipse cx="27" cy="43" rx="2.2" ry="4" fill="#111" />
+      <ellipse cx="37" cy="43" rx="2.2" ry="4" fill="#111" />
+    </symbol>
+    <symbol id="i-banana" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="55" rx="20" ry="4" fill="rgba(0,0,0,0.25)" />
+      <path d="M32 18 C30 30 26 40 14 52 C22 51 28 46 32 39 C36 46 42 51 50 52 C38 40 34 30 32 18 Z" fill="#ffd400" stroke="#d9a400" stroke-width="2.5" stroke-linejoin="round" />
+      <path d="M32 18 C31 30 31 40 32 50" stroke="#e8b800" stroke-width="2" fill="none" />
+      <rect x="29.5" y="10" width="5" height="10" rx="2" fill="#7a4b1e" />
+    </symbol>
+    <symbol id="i-itembox" viewBox="0 0 64 64">
+      <rect x="7" y="7" width="50" height="50" rx="11" fill="url(#g-itembox)" opacity="0.85" stroke="#fff" stroke-width="3" />
+      <text x="32" y="45" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="34" fill="#fff" stroke="#6a39ff" stroke-width="1.5">?</text>
+    </symbol>
+    <symbol id="i-shell" viewBox="0 0 64 64">
+      <path d="M8 40 C8 21 19 11 32 11 C45 11 56 21 56 40 Z" fill="#2fa84f" stroke="#1d7a36" stroke-width="2.5" />
+      <polygon points="32,18 41,23 41,33 32,38 23,33 23,23" fill="none" stroke="#d8ffd8" stroke-width="2.5" />
+      <rect x="6" y="38" width="52" height="11" rx="5.5" fill="#fff" stroke="#c9d3e8" stroke-width="2" />
+    </symbol>
+    <symbol id="i-coin" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="32" rx="19" ry="25" fill="#ffc400" stroke="#d99a00" stroke-width="4" />
+      <rect x="28.5" y="18" width="7" height="28" rx="3.5" fill="#e6a700" />
+    </symbol>
+    <symbol id="i-kart" viewBox="0 0 64 64">
+      <path d="M6 40 L14 30 L30 30 L36 24 L48 24 L52 32 L58 34 L58 42 L6 42 Z" fill="#e52521" stroke="#9b0d0d" stroke-width="2" stroke-linejoin="round" />
+      <circle cx="34" cy="18" r="7" fill="#f6c9a0" />
+      <path d="M26 16 C27 9 41 9 42 16 Z" fill="#e52521" />
+      <rect x="40" y="27" width="10" height="4" rx="2" fill="#9fd9ff" />
+      <circle cx="17" cy="44" r="7" fill="#1b1d2e" stroke="#9ea7c9" stroke-width="2.5" />
+      <circle cx="47" cy="44" r="7" fill="#1b1d2e" stroke="#9ea7c9" stroke-width="2.5" />
+    </symbol>
+    <symbol id="i-flag" viewBox="0 0 64 64">
+      <rect x="12" y="6" width="4" height="54" rx="2" fill="#c9d3e8" />
+      <path d="M16 8 C26 4 36 14 52 9 L52 33 C36 38 26 28 16 32 Z" fill="url(#p-checker)" stroke="#111" stroke-width="1.5" />
+    </symbol>
+  </svg>
+
+  <div class="side-deco" aria-hidden="true">
+    <div class="side side-left">
+      <svg class="track" viewBox="0 0 100 1000" preserveAspectRatio="none">
+        <path class="track-curb-base" d="M55 -20 C10 140 90 280 50 430 S5 720 50 860 S85 980 45 1040" />
+        <path class="track-curb" d="M55 -20 C10 140 90 280 50 430 S5 720 50 860 S85 980 45 1040" />
+        <path class="track-road" d="M55 -20 C10 140 90 280 50 430 S5 720 50 860 S85 980 45 1040" />
+        <path class="track-line" d="M55 -20 C10 140 90 280 50 430 S5 720 50 860 S85 980 45 1040" />
+      </svg>
+      <svg class="deco" style="--x:22%; --y:7%; --s:50; --r:-10deg; --d:0s"><use href="#i-itembox" /></svg>
+      <svg class="deco" style="--x:62%; --y:18%; --s:40; --r:8deg; --d:-2s"><use href="#i-banana" /></svg>
+      <svg class="deco" style="--x:18%; --y:31%; --s:44; --r:-6deg; --d:-4s"><use href="#i-mushroom" /></svg>
+      <svg class="deco" style="--x:66%; --y:44%; --s:56; --r:0deg; --d:-1s"><use href="#i-kart" /></svg>
+      <svg class="deco" style="--x:24%; --y:57%; --s:34; --r:12deg; --d:-3s"><use href="#i-coin" /></svg>
+      <svg class="deco" style="--x:60%; --y:69%; --s:46; --r:-14deg; --d:-5s"><use href="#i-star" /></svg>
+      <svg class="deco" style="--x:20%; --y:81%; --s:42; --r:6deg; --d:-2.5s"><use href="#i-shell" /></svg>
+      <svg class="deco" style="--x:58%; --y:91%; --s:48; --r:-4deg; --d:-6s"><use href="#i-flag" /></svg>
+    </div>
+    <div class="side side-right">
+      <svg class="track" viewBox="0 0 100 1000" preserveAspectRatio="none">
+        <path class="track-curb-base" d="M45 -20 C90 150 10 300 50 460 S95 740 50 880 S15 990 55 1040" />
+        <path class="track-curb" d="M45 -20 C90 150 10 300 50 460 S95 740 50 880 S15 990 55 1040" />
+        <path class="track-road" d="M45 -20 C90 150 10 300 50 460 S95 740 50 880 S15 990 55 1040" />
+        <path class="track-line" d="M45 -20 C90 150 10 300 50 460 S95 740 50 880 S15 990 55 1040" />
+      </svg>
+      <svg class="deco" style="--x:64%; --y:6%; --s:46; --r:10deg; --d:-1.5s"><use href="#i-star" /></svg>
+      <svg class="deco" style="--x:22%; --y:17%; --s:36; --r:-8deg; --d:-3.5s"><use href="#i-coin" /></svg>
+      <svg class="deco" style="--x:62%; --y:30%; --s:42; --r:-12deg; --d:-0.5s"><use href="#i-shell" /></svg>
+      <svg class="deco" style="--x:20%; --y:43%; --s:50; --r:6deg; --d:-4.5s"><use href="#i-itembox" /></svg>
+      <svg class="deco" style="--x:64%; --y:56%; --s:40; --r:-6deg; --d:-2s"><use href="#i-mushroom" /></svg>
+      <svg class="deco" style="--x:26%; --y:68%; --s:38; --r:14deg; --d:-5.5s"><use href="#i-banana" /></svg>
+      <svg class="deco" style="--x:60%; --y:80%; --s:56; --r:0deg; --d:-3s"><use href="#i-kart" /></svg>
+      <svg class="deco" style="--x:22%; --y:91%; --s:44; --r:8deg; --d:-1s"><use href="#i-itembox" /></svg>
+    </div>
+  </div>
+
   <main class="wrap">
     <section class="hero">
       <div class="hero-top">
@@ -1892,6 +2252,39 @@
         <div class="annual-ranking" aria-label="Jahreswertung Top 3">
           <h3 id="annualRankingTitle" class="annual-ranking-title">Jahreswertung</h3>
           <div id="annualRankingGrid" class="annual-ranking-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card stats-card">
+      <div class="section-head">
+        <h2 id="statsTitle">Fahrerstatistik</h2>
+        <div class="meta">Fahrpunkte ohne Handicap · bis zur ausgewählten Woche</div>
+      </div>
+      <div class="stats-body">
+        <div id="recordsGrid" class="highlights-grid records-grid" aria-label="Saisonrekorde"></div>
+        <div class="table-wrap stats-table-wrap">
+          <table class="stats-table" aria-label="Fahrerstatistik der Saison">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Spieler</th>
+                <th class="num" title="Turniere mit Fahrpunkten">Starts</th>
+                <th class="num" title="Durchschnittliche Fahrpunkte pro Start">Ø Pkt.</th>
+                <th class="num" title="Höchste Fahrpunkte in einem Turnier">Bestwert</th>
+                <th class="num" title="Turniere mit den meisten Fahrpunkten">Siege</th>
+                <th class="num" title="Turniere unter den besten drei nach Fahrpunkten">Podien</th>
+                <th class="num" title="Fahrpunkte der letzten fünf Turniere">Form</th>
+              </tr>
+            </thead>
+            <tbody id="statsBody"></tbody>
+          </table>
+        </div>
+        <button id="statsToggle" class="stats-toggle" type="button" hidden></button>
+        <div id="forecastBlock" class="annual-ranking" hidden>
+          <h3 class="annual-ranking-title">Prognose Saisonende</h3>
+          <div id="forecastGrid" class="annual-ranking-grid"></div>
+          <p id="forecastNote" class="stats-note"></p>
         </div>
       </div>
     </section>
@@ -1997,6 +2390,7 @@
       weekColumns: [],
       selectedWeekIndex: 0,
       avatarCache: new Map(),
+      statsExpanded: false,
       activePlayerId: null
     };
 
@@ -2015,6 +2409,14 @@
       reportText: document.getElementById("reportText"),
       highlightsGrid: document.getElementById("highlightsGrid"),
       annualRankingGrid: document.getElementById("annualRankingGrid"),
+      statsCard: document.querySelector(".stats-card"),
+      statsTitle: document.getElementById("statsTitle"),
+      recordsGrid: document.getElementById("recordsGrid"),
+      statsBody: document.getElementById("statsBody"),
+      statsToggle: document.getElementById("statsToggle"),
+      forecastBlock: document.getElementById("forecastBlock"),
+      forecastGrid: document.getElementById("forecastGrid"),
+      forecastNote: document.getElementById("forecastNote"),
       annualRankingTitle: document.getElementById("annualRankingTitle"),
       lineLegend: document.getElementById("lineLegend"),
       lineTooltip: document.getElementById("lineTooltip"),
@@ -2890,6 +3292,11 @@
       if (el.reportText) el.reportText.textContent = "";
       if (el.highlightsGrid) el.highlightsGrid.innerHTML = "";
       if (el.annualRankingGrid) el.annualRankingGrid.innerHTML = "";
+      if (el.recordsGrid) el.recordsGrid.innerHTML = "";
+      if (el.statsBody) el.statsBody.innerHTML = "";
+      if (el.forecastBlock) el.forecastBlock.hidden = true;
+      if (el.statsTitle) el.statsTitle.textContent = "Fahrerstatistik";
+      if (el.statsCard) el.statsCard.hidden = true;
       el.lineLegend.innerHTML = "";
     }
 
@@ -3465,6 +3872,169 @@
       });
     }
 
+    // Fahrerstatistik: Kennzahlen je Spieler auf Basis der Fahrpunkte (ohne Handicap) bis zur gewählten Woche.
+    function buildDriverStats(weekIndex) {
+      const weekCount = weekIndex + 1;
+      const ranked = rankByWeek(weekIndex);
+      const wins = new Map();
+      const podiums = new Map();
+
+      for (let w = 0; w < weekCount; w += 1) {
+        const scores = state.players.map((p) => ({ id: p.id, raw: p.rawWeekScores?.[w] || 0 })).filter((s) => s.raw > 0);
+        if (!scores.length) continue;
+        const best = Math.max(...scores.map((s) => s.raw));
+        scores.forEach((s) => {
+          if (s.raw === best) wins.set(s.id, (wins.get(s.id) || 0) + 1);
+          const placeInWeek = scores.filter((o) => o.raw > s.raw).length + 1;
+          if (placeInWeek <= 3) podiums.set(s.id, (podiums.get(s.id) || 0) + 1);
+        });
+      }
+
+      const rows = ranked.map((p) => {
+        const raws = (p.rawWeekScores || []).slice(0, weekCount);
+        const started = raws.filter((r) => r > 0);
+        const starts = started.length;
+        const avg = starts ? started.reduce((a, b) => a + b, 0) / starts : 0;
+        const spread = starts ? Math.sqrt(started.reduce((a, r) => a + (r - avg) ** 2, 0) / starts) : 0;
+        const bestIdx = raws.reduce((bi, r, i) => (r > (raws[bi] || 0) ? i : bi), 0);
+        return {
+          ...p,
+          starts,
+          avg,
+          spread,
+          best: raws[bestIdx] || 0,
+          bestWeek: state.weekColumns[bestIdx]?.week ?? null,
+          wins: wins.get(p.id) || 0,
+          podiums: podiums.get(p.id) || 0,
+          form: raws.slice(-5).map((r, i) => ({ raw: r, week: state.weekColumns[Math.max(0, weekCount - 5) + i]?.week }))
+        };
+      });
+
+      return { rows, weekCount };
+    }
+
+    function formatNumber(value, digits = 0) {
+      return Number(value || 0).toLocaleString("de-DE", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+
+    function renderDriverStats() {
+      if (!el.statsBody || !state.players.length || !state.weekColumns.length) return;
+      const weekIndex = state.selectedWeekIndex;
+      const weekNo = state.weekColumns[weekIndex]?.week ?? weekIndex + 1;
+      const { rows, weekCount } = buildDriverStats(weekIndex);
+      const active = rows.filter((r) => r.starts > 0);
+      if (el.statsCard) el.statsCard.hidden = false;
+      if (el.statsTitle) el.statsTitle.textContent = `Fahrerstatistik – ${state.selectedSeasonLabel} · bis Woche ${weekNo}`;
+
+      // Rekorde und Vergleiche
+      const record = [...active].sort((a, b) => b.best - a.best || a.rank - b.rank)[0];
+      const minStarts = Math.max(1, Math.ceil(weekCount / 2));
+      const regulars = active.filter((r) => r.starts >= minStarts);
+      const bestAvg = [...regulars].sort((a, b) => b.avg - a.avg || a.rank - b.rank)[0];
+      const steady = [...regulars].filter((r) => r.starts >= Math.min(3, weekCount)).sort((a, b) => a.spread - b.spread || b.avg - a.avg)[0];
+      const mostWins = [...active].sort((a, b) => b.wins - a.wins || b.podiums - a.podiums || a.rank - b.rank)[0];
+      const byHcp = [...active].sort((a, b) => b.handicapPointsTotal - a.handicapPointsTotal || a.rank - b.rank);
+      const hcpWinner = byHcp[0];
+      const hcpLoser = byHcp[byHcp.length - 1];
+      const totalStarts = active.reduce((a, r) => a + r.starts, 0);
+      const avgField = weekCount ? totalStarts / weekCount : 0;
+
+      const records = [
+        {
+          label: "🔥 Saisonrekord",
+          value: record ? displayName(record) : "-",
+          sub: record ? `${formatNumber(record.best)} Fahrpunkte in KW ${record.bestWeek}` : "Keine Daten"
+        },
+        {
+          label: "📊 Bester Schnitt",
+          value: bestAvg ? displayName(bestAvg) : "-",
+          sub: bestAvg ? `Ø ${formatNumber(bestAvg.avg)} Pkt. pro Start · mind. ${minStarts} Starts` : "Keine Daten"
+        },
+        {
+          label: "🎯 Konstantester Fahrer",
+          value: steady ? displayName(steady) : "-",
+          sub: steady ? `Schwankung ±${formatNumber(steady.spread)} Pkt. bei Ø ${formatNumber(steady.avg)}` : "Zu wenige Starts"
+        },
+        {
+          label: "🏁 Meiste Tagessiege",
+          value: mostWins && mostWins.wins ? displayName(mostWins) : "-",
+          sub: mostWins && mostWins.wins ? `${mostWins.wins} Sieg${mostWins.wins !== 1 ? "e" : ""} · ${mostWins.podiums} Podien` : "Keine Daten"
+        },
+        {
+          label: "⚖️ Handicap-Bilanz",
+          value: hcpWinner ? displayName(hcpWinner) : "-",
+          sub: hcpWinner && hcpLoser
+            ? `${formatSigned(hcpWinner.handicapPointsTotal)} Pkt. durch Handicap · am meisten abgegeben: ${displayName(hcpLoser)} (${formatSigned(hcpLoser.handicapPointsTotal)})`
+            : "Keine Daten"
+        },
+        {
+          label: "👥 Teilnehmerfeld",
+          value: `Ø ${formatNumber(avgField, 1)} Fahrer`,
+          sub: `${weekCount} Turnier${weekCount !== 1 ? "e" : ""} · ${totalStarts} Starts insgesamt`
+        }
+      ];
+
+      el.recordsGrid.innerHTML = records.map((item) => `
+        <article class="highlight-tile">
+          <div class="highlight-label">${escapeHtml(item.label)}</div>
+          <div class="highlight-value">${escapeHtml(item.value)}</div>
+          <div class="highlight-sub">${escapeHtml(item.sub)}</div>
+        </article>
+      `).join("");
+
+      // Tabelle je Spieler, sortiert nach aktuellem Gesamtrang
+      const seasonMax = Math.max(1, ...rows.flatMap((r) => r.form.map((f) => f.raw)));
+      const collapsedCount = 10;
+      const visibleRows = state.statsExpanded ? rows : rows.slice(0, collapsedCount);
+      if (el.statsToggle) {
+        el.statsToggle.hidden = rows.length <= collapsedCount;
+        el.statsToggle.textContent = state.statsExpanded ? "Weniger anzeigen ▲" : `Alle ${rows.length} Fahrer anzeigen ▼`;
+        el.statsToggle.setAttribute("aria-expanded", state.statsExpanded ? "true" : "false");
+      }
+      el.statsBody.innerHTML = visibleRows.map((r) => {
+        const form = r.form.map((f) => f.raw > 0
+          ? `<span class="form-bar" style="height:${Math.max(14, Math.round((f.raw / seasonMax) * 100))}%; background:${r.color}" title="KW ${f.week}: ${formatNumber(f.raw)} Pkt."></span>`
+          : `<span class="form-bar is-missing" title="KW ${f.week}: nicht gestartet"></span>`
+        ).join("");
+        return `
+          <tr>
+            <td class="rank">${r.rank}</td>
+            <td>
+              <div class="stats-player">
+                <span class="stats-dot" style="background:${r.color}"></span>
+                <span class="stats-name">${escapeHtml(displayName(r))}</span>
+              </div>
+            </td>
+            <td class="num" data-label="Starts">${r.starts}/${weekCount}</td>
+            <td class="num" data-label="Ø Pkt.">${r.starts ? formatNumber(r.avg) : "–"}</td>
+            <td class="num" data-label="Best">${r.best ? formatNumber(r.best) : "–"}</td>
+            <td class="num" data-label="Siege">${r.wins}</td>
+            <td class="num" data-label="Podien">${r.podiums}</td>
+            <td class="num" data-label="Form"><span class="form-spark" aria-label="Form der letzten Turniere">${form}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      // Prognose nur für die laufende Saison mit verbleibenden Turniertagen
+      const forecast = state.selectedSeasonKey === currentSeasonKey() ? seasonForecastTopThree(weekIndex) : [];
+      const remaining = forecast[0]?.remainingTournaments || 0;
+      if (el.forecastBlock) el.forecastBlock.hidden = !(forecast.length && remaining > 0);
+      if (forecast.length && remaining > 0) {
+        const medals = ["🥇", "🥈", "🥉"];
+        el.forecastGrid.innerHTML = forecast.map((entry, idx, arr) => {
+          const info = forecastLabel(entry, idx, arr);
+          return `
+            <article class="highlight-tile is-annual">
+              <div class="highlight-label">${medals[idx]} Prognose Platz ${idx + 1}</div>
+              <div class="highlight-value">${escapeHtml(info.value)}</div>
+              <div class="highlight-sub">${escapeHtml(info.sub)}</div>
+            </article>
+          `;
+        }).join("");
+        el.forecastNote.textContent = `Hochrechnung: gewertete Punkte im Schnitt der letzten 3 Turniere × ${remaining} verbleibende Turniertag${remaining !== 1 ? "e" : ""}.`;
+      }
+    }
+
     function renderPositionsChart() {
       const svg = el.positionsChart;
       clearSvg(svg);
@@ -3556,7 +4126,7 @@
       }
 
       el.lineLegend.innerHTML = "";
-      players.slice(0, 14).forEach((p) => {
+      players.forEach((p) => {
         const item = document.createElement("span");
         item.className = "legend-item";
         item.innerHTML = `<span class="legend-dot" style="background:${p.color}"></span>${displayName(p)}`;
@@ -3580,8 +4150,8 @@
       const height = 360;
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
       const m = isMobile
-        ? { top: 12, right: 10, bottom: 24, left: 132 }
-        : { top: 12, right: 12, bottom: 28, left: 180 };
+        ? { top: 12, right: 42, bottom: 24, left: 132 }
+        : { top: 12, right: 48, bottom: 28, left: 180 };
       const iw = width - m.left - m.right;
       const rowH = (height - m.top - m.bottom) / top.length;
       const max = Math.max(1, ...top.map((p) => p.pointsTotal));
@@ -3614,8 +4184,8 @@
       const height = 360;
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
       const m = isMobile
-        ? { top: 12, right: 10, bottom: 24, left: 132 }
-        : { top: 12, right: 12, bottom: 28, left: 180 };
+        ? { top: 12, right: 42, bottom: 24, left: 132 }
+        : { top: 12, right: 48, bottom: 28, left: 180 };
       const iw = width - m.left - m.right;
       const rowH = (height - m.top - m.bottom) / top.length;
       const max = Math.max(1, ...top.map((p) => p.recent));
@@ -3642,6 +4212,7 @@
       if (titleEl) titleEl.textContent = `Tabelle – ${state.selectedSeasonLabel} · Woche ${weekNo}`;
       renderTable();
       renderWeeklyReport();
+      renderDriverStats();
       renderPositionsChart();
       renderPointsChart();
       renderMomentumChart();
@@ -3685,6 +4256,13 @@
           state.selectedWeekIndex = Number(el.slider.value);
           render();
         });
+
+        if (el.statsToggle) {
+          el.statsToggle.addEventListener("click", () => {
+            state.statsExpanded = !state.statsExpanded;
+            renderDriverStats();
+          });
+        }
 
         el.gameMk8dBtn.addEventListener("click", () => applyGameSelection("mk8d"));
         el.gameMkworldBtn.addEventListener("click", () => applyGameSelection("mkworld"));
