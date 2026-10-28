@@ -1754,8 +1754,10 @@
       "black yoshi": { page: "Yoshi", color: "#2f2f2f", faceAnchor: "upper" },
       "knochenbowser": { page: "Dry Bowser", color: "#9ea7c9", faceAnchor: "upper"  },
       "knochen bowser": { page: "Dry Bowser", color: "#9ea7c9", faceAnchor: "upper"  },
-      "larry": { page: "Larry", color: "#b2a513", faceAnchor: "upper"  },
-    "lemmy": { page: "Lemmy", color: "#ac7a49", faceAnchor: "upper"  },
+      "larry": { page: "Larry", color: "#b2a513", faceAnchor: "upper", image: "https://mario.wiki.gallery/images/c/c2/MK8_Larry_Icon.png" },
+      "larry koopa": { page: "Larry", color: "#b2a513", faceAnchor: "upper", image: "https://mario.wiki.gallery/images/c/c2/MK8_Larry_Icon.png" },
+      "lemmy": { page: "Lemmy", color: "#ac7a49", faceAnchor: "upper", image: "https://mario.wiki.gallery/images/f/fc/MK8_Lemmy_Icon.png" },
+      "lemmy koopa": { page: "Lemmy", color: "#ac7a49", faceAnchor: "upper", image: "https://mario.wiki.gallery/images/f/fc/MK8_Lemmy_Icon.png" },
     };
 
     const COLOR_POOL = ["#2f57ff", "#6a39ff", "#00b7ff", "#8c4dff", "#3044c8", "#7a52ff", "#4f63ff", "#9a62ff"];
@@ -2193,11 +2195,24 @@
       if (!key) return null;
       if (state.avatarCache.has(key)) return state.avatarCache.get(key);
 
+      // Direkte Bild-URL (z. B. aus charakter_bild_url) ohne API-Abfrage verwenden.
+      const seedText = String(seedOrCharacterOrName || "").trim();
+      if (/^https?:\/\/\S+\.(png|jpe?g|gif|webp|svg)(\?\S*)?$/i.test(seedText)) {
+        state.avatarCache.set(key, seedText);
+        return seedText;
+      }
+
+      // Fest hinterlegtes Bild aus CHARACTER_META bevorzugen.
+      const meta = characterMetaFor(seedOrCharacterOrName);
+      if (meta?.image) {
+        state.avatarCache.set(key, meta.image);
+        return meta.image;
+      }
+
       const titles = [];
       const asWikiTitle = titleFromMarioWikiUrl(seedOrCharacterOrName);
       if (asWikiTitle) titles.push(asWikiTitle);
 
-      const meta = characterMetaFor(seedOrCharacterOrName);
       if (meta?.page) titles.push(meta.page);
 
       titles.push(String(seedOrCharacterOrName || ""));
