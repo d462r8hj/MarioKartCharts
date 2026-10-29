@@ -138,7 +138,7 @@
           <label class="f">Alias / Gamertag <input type="text" id="alias" placeholder="SpeedyMax" maxlength="24"></label>
           <label class="f">Ort <input type="text" id="city" placeholder="Köln" maxlength="28"></label>
         </div>
-        <label class="f">Motto / Über mich <textarea id="bio" maxlength="140" placeholder="Blauer Panzer? Kenn ich nicht."></textarea></label>
+        <label class="f">Motto / Über mich <textarea id="bio" maxlength="100" placeholder="Blauer Panzer? Kenn ich nicht."></textarea></label>
       </div>
 
       <div class="group tint">
@@ -180,7 +180,7 @@
     <!-- VORSCHAU -->
     <aside class="preview">
       <div class="card">
-        <div class="section-head"><h2>Vorschau</h2><span class="pill" id="size">1080 × 1350</span></div>
+        <div class="section-head"><h2>Vorschau</h2><span class="pill">63 × 88 mm · 1134 × 1584 px</span></div>
         <div style="padding:12px 12px 0"><canvas id="cv" width="1080" height="1350"></canvas></div>
         <div class="actions">
           <button class="btn" id="dl">⬇ Als PNG speichern</button>
@@ -268,7 +268,7 @@ function loadChar(){
 $('main').addEventListener('change',loadChar);
 
 // --- Zeichnen
-let H=1350; const cv=$('cv'), ctx=cv.getContext('2d'), W=1080, F='"Trebuchet MS","Verdana",sans-serif';
+const CARD_W=1134, CARD_H=1584; let H=1350; const cv=$('cv'), ctx=cv.getContext('2d'), W=1080, F='"Trebuchet MS","Verdana",sans-serif';
 function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
 function fit(txt,maxW,size,weight='800'){ let s=size; do{ ctx.font=`${weight} ${s}px ${F}`; s-=2; }while(ctx.measureText(txt).width>maxW && s>16); return txt; }
 function wrap(txt,maxW,maxLines){
@@ -299,10 +299,11 @@ function draw(){
   const v=id=>$(id).value.trim(), c=THEMES[state.theme];
   const acc=[['NINTENDO','#e60012','nintendo'],['STEAM','#1b2838','steam'],['XBOX','#107c10','xbox'],['PSN','#003791','psn'],['DISCORD','#5865f2','discord'],['SONSTIGES','#00a0d6','other']].filter(a=>v(a[2]));
   const tw=(W-60-68-20)/2, th=84, py0=560;
-  ctx.font=`italic 700 28px ${F}`; const bioL=v('bio')?wrap('„'+v('bio')+'“',W-60-68-40,3):[];
+  ctx.font=`italic 700 28px ${F}`; const bioL=v('bio')?wrap('„'+v('bio')+'“',W-60-68-40,2):[];
   const hasB=v('times')||state.platforms.size, hasC=v('games');
-  const need=py0+88+Math.max(1,Math.ceil(acc.length/2))*(th+14)+22+26+((state.mainImg||v('main'))?124:84)+(hasB?92:0)+(hasC?84:0)+(bioL.length?bioL.length*38+50:0)+80;
-  H=Math.max(1180,need); cv.height=H; $('size').textContent=W+' × '+H;
+  // Fester Rahmen im Pokémon-Kartenformat 63 × 88 mm (18 px je mm)
+  cv.width=CARD_W; cv.height=CARD_H; ctx.scale(CARD_W/W,CARD_W/W); H=CARD_H/(CARD_W/W);
+  ctx.beginPath(); ctx.roundRect(0,0,W,H,44); ctx.clip();
   // Hintergrund
   let g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#050712'); g.addColorStop(1,'#10153a'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
   ctx.globalAlpha=.06; ctx.fillStyle='#fff';
@@ -388,6 +389,8 @@ function draw(){
   // Footer
   ctx.fillStyle='#8a94c8'; ctx.font=`700 20px ${F}`; ctx.textAlign='right';
   ctx.fillText(GROUP+' · '+new Date().toLocaleDateString('de-DE'),W-64,H-52); ctx.textAlign='left';
+  // Kartenrahmen
+  rr(12,12,W-24,H-24,36); ctx.lineWidth=5; ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.stroke();
   // Zähler
   $('filled').textContent=TEXT.filter(k=>k!=='mk'&&v(k)).length+' Felder';
 }
