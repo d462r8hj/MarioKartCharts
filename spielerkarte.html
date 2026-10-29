@@ -40,9 +40,11 @@
   @keyframes shine { 0%{transform:skewX(-18deg) translateX(-120%)} 45%,100%{transform:skewX(-18deg) translateX(120%)} }
   .hero h1 { margin:0; font-size:clamp(1.6rem,2.7vw,2.3rem); text-transform:uppercase; letter-spacing:.4px; text-shadow:0 3px 10px rgba(0,0,0,.35); }
   .game-switch { display:inline-flex; border-radius:999px; border:1px solid rgba(255,255,255,.35); overflow:hidden; background:rgba(10,22,77,.35); max-width:100%; }
-  .game-btn { color:#fff; text-decoration:none; font-weight:700; font-size:.82rem; padding:7px 11px; letter-spacing:.2px; display:inline-flex; align-items:center; white-space:nowrap; }
+  .game-btn { font-family:inherit; color:#fff; text-decoration:none; font-weight:700; font-size:.82rem; padding:7px 11px; letter-spacing:.2px; display:inline-flex; align-items:center; white-space:nowrap; }
   .game-btn[aria-pressed="true"] { background:rgba(255,255,255,.24); }
-  @media (max-width:560px){ .game-switch{width:100%} .game-btn{flex:1;justify-content:center;padding:8px 6px;font-size:.76rem} }
+  @media (max-width:560px){ .game-switch{width:100%} .game-btn{flex:1;justify-content:center;padding:8px 4px;font-size:.74rem} }
+  .hero { padding-top:34px; }
+  .game-switch { display:flex; width:fit-content; margin:0 auto 14px; }
   .badge {
     margin-top:10px; display:inline-block; padding:7px 11px; border-radius:10px; background:rgba(10,22,77,.4);
     border:1px solid rgba(255,255,255,.35); font-size:.9rem; font-weight:700;
@@ -100,7 +102,7 @@
       <a class="game-btn" href="./#mkworld">Mario Kart World</a>
       <a class="game-btn" href="spielerkarte.html" aria-pressed="true">Spielerkarte</a>
     </div>
-    <h1 style="margin-top:12px">Spielerkarte erstellen</h1>
+    <h1>Spielerkarte erstellen</h1>
     <div class="badge">🔒 Alles bleibt lokal in deinem Browser – nichts wird hochgeladen</div>
 
   </header>
