@@ -157,6 +157,13 @@
       letter-spacing: 0.2px;
     }
 
+    a.game-btn {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .game-btn[aria-pressed="true"] {
       background: rgba(255, 255, 255, 0.24);
     }
@@ -2176,6 +2183,7 @@
         <div class="game-switch" role="tablist" aria-label="Spiel auswählen">
           <button id="gameMk8dBtn" class="game-btn" type="button" aria-pressed="true">MK8 Deluxe</button>
           <button id="gameMkworldBtn" class="game-btn" type="button" aria-pressed="false">Mario Kart World</button>
+          <a class="game-btn" href="spielerkarte.html">Spielerkarte</a>
         </div>
       </div>
       <div class="countdown-container">
@@ -4271,7 +4279,8 @@
           new Set(tournamentRows.map((row) => normalizeGameKey(row.spiel || row.game || row.modus_spiel || "mk8d")))
         );
         state.availableGames = detectedGames;
-        state.selectedGame = detectedGames.includes("mk8d") ? "mk8d" : (detectedGames[0] || "mk8d");
+        const hashGame = location.hash.replace("#", "");
+        state.selectedGame = detectedGames.includes(hashGame) ? hashGame : (detectedGames.includes("mk8d") ? "mk8d" : (detectedGames[0] || "mk8d"));
         applyGameSelection(state.selectedGame);
 
         const updateCountdowns = () => {

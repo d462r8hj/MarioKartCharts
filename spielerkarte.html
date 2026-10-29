@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spielerkarte – Zockergruppe</title>
+<style>
+  :root {
+    --bg-1:#050712; --bg-2:#10153a; --card:#fff; --ink:#14172b; --muted:#5f6893; --line:#dbe2ff;
+    --blue-1:#1f35b8; --blue-2:#2f57ff; --blue-3:#00b7ff; --violet-1:#6a39ff; --violet-2:#8c4dff;
+    --shadow:0 16px 40px rgba(2,8,26,.45);
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; color:var(--ink); font-family:"Trebuchet MS","Verdana",sans-serif; min-height:100vh; position:relative;
+    background:
+      radial-gradient(circle at 10% 15%, rgba(47,87,255,.26), transparent 28%),
+      radial-gradient(circle at 88% 8%, rgba(140,77,255,.24), transparent 28%),
+      radial-gradient(circle at 78% 90%, rgba(0,183,255,.22), transparent 30%),
+      linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    background-attachment:fixed;
+  }
+  body::before {
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.07; z-index:0;
+    background-image:linear-gradient(45deg,#fff 25%,transparent 25%),linear-gradient(-45deg,#fff 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#fff 75%),linear-gradient(-45deg,transparent 75%,#fff 75%);
+    background-size:22px 22px; background-position:0 0,0 11px,11px -11px,-11px 0;
+  }
+  .wrap { width:min(1220px,94vw); margin:24px auto 34px; display:grid; gap:16px; position:relative; z-index:1; }
+  .hero {
+    border-radius:18px; padding:24px 22px; color:#fff; box-shadow:var(--shadow); position:relative; overflow:hidden;
+    background:linear-gradient(120deg,rgba(0,183,255,.9),rgba(47,87,255,.92) 42%,rgba(140,77,255,.92));
+    border:2px solid rgba(255,255,255,.24);
+  }
+  .hero::before {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);
+    transform:skewX(-18deg) translateX(-120%); animation:shine 6s ease-in-out infinite;
+  }
+  @keyframes shine { 0%{transform:skewX(-18deg) translateX(-120%)} 45%,100%{transform:skewX(-18deg) translateX(120%)} }
+  .hero h1 { margin:0; font-size:clamp(1.6rem,2.7vw,2.3rem); text-transform:uppercase; letter-spacing:.4px; text-shadow:0 3px 10px rgba(0,0,0,.35); }
+  .game-switch { display:inline-flex; border-radius:999px; border:1px solid rgba(255,255,255,.35); overflow:hidden; background:rgba(10,22,77,.35); max-width:100%; }
+  .game-btn { color:#fff; text-decoration:none; font-weight:700; font-size:.82rem; padding:7px 11px; letter-spacing:.2px; display:inline-flex; align-items:center; white-space:nowrap; }
+  .game-btn[aria-pressed="true"] { background:rgba(255,255,255,.24); }
+  @media (max-width:560px){ .game-switch{width:100%} .game-btn{flex:1;justify-content:center;padding:8px 6px;font-size:.76rem} }
+  .badge {
+    margin-top:10px; display:inline-block; padding:7px 11px; border-radius:10px; background:rgba(10,22,77,.4);
+    border:1px solid rgba(255,255,255,.35); font-size:.9rem; font-weight:700;
+  }
+  .layout { display:grid; gap:16px; grid-template-columns:minmax(0,1fr) minmax(0,420px); align-items:start; }
+  @media (max-width:900px){ .layout{grid-template-columns:1fr} .preview{position:static!important} }
+  .card { background:var(--card); border:2px solid #dbe4ff; border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .section-head { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); background:#f4f7ff; }
+  .section-head h2 { margin:0; font-size:1.03rem; text-transform:uppercase; letter-spacing:.4px; }
+  .pill { border-radius:999px; padding:6px 11px; background:linear-gradient(120deg,var(--blue-1),var(--violet-1)); color:#fff; font-weight:700; font-size:.84rem; white-space:nowrap; }
+  .group { padding:14px 16px 16px; border-bottom:1px solid var(--line); display:grid; gap:10px; }
+  .group:last-child { border-bottom:0; }
+  .group.tint { background:linear-gradient(135deg,rgba(47,87,255,.07),rgba(140,77,255,.10)); }
+  .group h3 { margin:0; font-size:.9rem; text-transform:uppercase; color:#253061; letter-spacing:.3px; }
+  .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  @media (max-width:560px){ .grid2{grid-template-columns:1fr} }
+  label.f { display:grid; gap:4px; font-size:.75rem; font-weight:700; text-transform:uppercase; color:#253061; }
+  label.f small { font-weight:400; text-transform:none; color:var(--muted); }
+  input[type=text], select, textarea {
+    font:inherit; font-size:.92rem; text-transform:none; font-weight:400; color:#24326f;
+    border:1px solid #bbc8ff; border-radius:8px; padding:8px 10px; background:#fff; width:100%;
+  }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--violet-2); outline-offset:1px; }
+  textarea { resize:vertical; min-height:62px; }
+  input[type=range] { width:100%; accent-color:var(--blue-2); cursor:pointer; }
+  .acc { display:grid; grid-template-columns:34px 1fr; gap:8px; align-items:end; }
+  .acc i { font-style:normal; width:34px; height:34px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:.7rem; }
+  .upload {
+    display:grid; gap:6px; border:2px dashed #b9c5ff; border-radius:12px; padding:12px; text-align:center;
+    background:#fff; cursor:pointer; font-size:.82rem; color:var(--muted);
+  }
+  .upload:hover { border-color:var(--violet-2); }
+  .upload input { display:none; }
+  .upload img { width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; border:2px solid #b17bff; box-shadow:0 0 0 2px #1243d2; display:none; }
+  .themes { display:flex; gap:8px; flex-wrap:wrap; }
+  .theme-btn { width:38px; height:38px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 1px #bbc8ff; cursor:pointer; padding:0; }
+  .theme-btn[aria-pressed=true] { box-shadow:0 0 0 3px var(--violet-1); transform:scale(1.08); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { border:1px solid #bbc8ff; background:#fff; color:#24326f; border-radius:999px; padding:5px 10px; font-weight:700; font-size:.78rem; cursor:pointer; user-select:none; }
+  .chip[aria-pressed=true] { background:linear-gradient(120deg,var(--blue-1),var(--violet-1)); color:#fff; border-color:var(--violet-1); }
+  .preview { position:sticky; top:16px; display:grid; gap:12px; }
+  .preview canvas { width:100%; height:auto; display:block; border-radius:12px; background:#0b0f2a; }
+  .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
+  button.btn { font:inherit; font-weight:800; text-transform:uppercase; letter-spacing:.3px; font-size:.85rem; border:0; border-radius:10px; padding:11px; cursor:pointer; color:#fff; background:linear-gradient(120deg,var(--blue-1),var(--violet-1)); }
+  button.btn.alt { background:#fff; color:#24326f; border:1px solid #bbc8ff; }
+  button.btn:hover { filter:brightness(1.08); }
+  .note { font-size:.78rem; color:var(--muted); padding:0 14px 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="game-switch" role="tablist" aria-label="Bereich auswählen">
+      <a class="game-btn" href="./#mk8d">MK8 Deluxe</a>
+      <a class="game-btn" href="./#mkworld">Mario Kart World</a>
+      <a class="game-btn" href="spielerkarte.html" aria-pressed="true">Spielerkarte</a>
+    </div>
+    <h1 style="margin-top:12px">Spielerkarte erstellen</h1>
+    <div class="badge">🔒 Alles bleibt lokal in deinem Browser – nichts wird hochgeladen</div>
+
+  </header>
+
+  <div class="layout">
+    <!-- FORMULAR -->
+    <section class="card">
+      <div class="section-head"><h2>Deine Daten</h2><span class="pill" id="filled">0 Felder</span></div>
+
+      <div class="group" style="background:#fff8e1;border-bottom:1px solid #ffe08a">
+        <div style="font-size:.85rem;color:#6b5200">✏️ <b>Beispieldaten:</b> Alle Felder sind mit Vorschlägen gefüllt – ein Klick ins Feld markiert den Text, einfach drüberschreiben. Mit „Alles leeren“ startest du bei null.</div>
+      </div>
+
+      <div class="group tint">
+        <h3>Bilder</h3>
+        <div class="grid2">
+          <label class="upload">📷 Foto / Profilbild<small>Klicken zum Auswählen</small>
+            <img id="photoThumb" alt=""><input type="file" id="photoFile" accept="image/*"></label>
+          <label class="upload">🎮 Nintendo-Avatar / Mii<small>Optional</small>
+            <img id="avatarThumb" alt=""><input type="file" id="avatarFile" accept="image/*"></label>
+        </div>
+        <label class="f">Foto-Zoom <input type="range" id="zoom" min="1" max="3" step="0.05" value="1"></label>
+        <div class="grid2">
+          <label class="f">Ausschnitt horizontal <input type="range" id="panX" min="-1" max="1" step="0.02" value="0"></label>
+          <label class="f">Ausschnitt vertikal <input type="range" id="panY" min="-1" max="1" step="0.02" value="0"></label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Wer bist du?</h3>
+        <div class="grid2">
+          <label class="f">Name <input type="text" id="name" placeholder="Max Mustermann" maxlength="28"></label>
+          <label class="f">Alias / Gamertag <input type="text" id="alias" placeholder="SpeedyMax" maxlength="24"></label>
+          <label class="f">Ort <input type="text" id="city" placeholder="Köln" maxlength="28"></label>
+        </div>
+        <label class="f">Motto / Über mich <textarea id="bio" maxlength="140" placeholder="Blauer Panzer? Kenn ich nicht."></textarea></label>
+      </div>
+
+      <div class="group tint">
+        <h3>Accounts</h3>
+        <div class="grid2">
+          <div class="acc"><i style="background:#e60012">NIN</i><label class="f">Nintendo <small>Friend-Code</small><input type="text" id="nintendo" placeholder="SW-1234-5678-9012"></label></div>
+          <div class="acc"><i style="background:#1b2838">STM</i><label class="f">Steam <small>Name oder Freundescode</small><input type="text" id="steam"></label></div>
+          <div class="acc"><i style="background:#107c10">XB</i><label class="f">Xbox Gamertag <input type="text" id="xbox"></label></div>
+          <div class="acc"><i style="background:#003791">PS</i><label class="f">PSN-ID <input type="text" id="psn"></label></div>
+          <div class="acc"><i style="background:#5865f2">DC</i><label class="f">Discord <input type="text" id="discord"></label></div>
+          <div class="acc"><i style="background:#00b7ff">+</i><label class="f">Sonstiges <small>z. B. Battle.net, EA</small><input type="text" id="other"></label></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Zocker-Details</h3>
+        <div class="grid2">
+          <label class="f">Main-Charakter <select id="main"><option value="">– wählen –</option></select></label>
+          <label class="upload" style="padding:8px">🍄 Eigenes Bild statt Standard<small>Optional</small><img id="mainThumb" alt=""><input type="file" id="mainFile" accept="image/*"></label>
+          <label class="f">Mario Kart gespielt
+            <select id="mk">
+              <option>Nur Mario Kart 8 Deluxe</option>
+              <option>Mario Kart 8 Deluxe + World</option>
+              <option>Nur Mario Kart World</option>
+            </select></label>
+          <label class="f">Zockt meistens <input type="text" id="times" placeholder="MK8 Mittwoch, MKW Sonntag" maxlength="40"></label>
+        </div>
+        <label class="f">Meine Games <small>kommagetrennt</small><input type="text" id="games" placeholder="Fortnite, MarioKart" maxlength="70"></label>
+        <div><div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#253061;margin-bottom:6px">Plattformen <small style="font-weight:400;text-transform:none;color:#5f6893">– nur Angehakte erscheinen auf der Karte</small></div>
+          <div class="chips" id="platforms"></div></div>
+      </div>
+
+      <div class="group tint">
+        <h3>Look</h3>
+        <div class="themes" id="themes"></div>
+      </div>
+    </section>
+
+    <!-- VORSCHAU -->
+    <aside class="preview">
+      <div class="card">
+        <div class="section-head"><h2>Vorschau</h2><span class="pill" id="size">1080 × 1350</span></div>
+        <div style="padding:12px 12px 0"><canvas id="cv" width="1080" height="1350"></canvas></div>
+        <div class="actions">
+          <button class="btn" id="dl">⬇ Als PNG speichern</button>
+          <button class="btn alt" id="cp">📋 In Zwischenablage</button>
+          <button class="btn alt" id="sv">💾 Entwurf merken</button>
+          <button class="btn alt" id="rs">↺ Beispiel laden</button>
+          <button class="btn alt" id="cl" style="grid-column:1/-1">🗑 Alles leeren</button>
+        </div>
+        <div class="note">Der Entwurf wird – nur auf diesem Gerät – im Browser gespeichert. Das PNG kannst du direkt in den Gruppenchat posten.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TEXT = ['name','alias','city','bio','nintendo','steam','xbox','psn','discord','other','main','times','games','mk'];
+const GROUP = 'SugarDaddyMarioKart';
+const CHARS = {
+  'Mario':['#e60012','M'],'Luigi':['#2fa84f','L'],'Peach':['#ff8fc7','P'],'Daisy':['#ffb300','D'],'Rosalina':['#6fd6e8','R'],
+  'Yoshi':['#5cd65c','Y'],'Toad':['#e8454a','T'],'Toadette':['#ff7ab8','Tt'],'Bowser':['#d98e00','B'],'Bowser Jr.':['#7bbf3a','BJ'],
+  'Donkey Kong':['#8b5a2b','DK'],'Diddy Kong':['#c0392b','DD'],'Funky Kong':['#2c3e8f','FK'],'Wario':['#f2d600','W'],'Waluigi':['#6a39ff','Wa'],
+  'Koopa Troopa':['#43b84b','K'],'Shy Guy':['#d62828','SG'],'Lakitu':['#4fb0e8','La'],'Baby Mario':['#ff5a5f','bM'],'Baby Peach':['#ffb3d9','bP'],
+  'Baby Luigi':['#7bd88f','bL'],'Baby Daisy':['#ffd36b','bD'],'Baby Rosalina':['#a5e8f2','bR'],'King Boo':['#9aa8e8','KB'],'Dry Bones':['#b0b6c8','DB'],
+  'Dry Bowser':['#7a8296','DBw'],'Birdo':['#ff6fb5','Bi'],'Pauline':['#e8344a','Pa'],'Metal Mario':['#9aa3b5','MM'],'Pink Gold Peach':['#e0b200','GP'],
+  'Link':['#2f8f4e','Li'],'Isabelle':['#f2c14e','Is'],'Villager':['#8bc34a','Vi'],'Inkling':['#ff7a1a','In'],'Mii':['#4a90e2','Mii'],
+  'Gold Mario':['#e0b200','GM'],'Cat Peach':['#ffd36b','CP'],'Tanooki Mario':['#b5651d','TM'],
+  'Larry':['#4fb0e8','Lr'],'Lemmy':['#f2c14e','Le'],'Wendy':['#ff6fb5','We'],'Ludwig':['#4a5578','Lu'],'Iggy':['#8ae600','Ig'],'Roy':['#c8102e','Ro'],'Morton':['#6a39ff','Mo']
+};
+// Icons wie auf MarioKartCharts: extern vom Mario-Wiki, Emblem als Fallback
+const ICONS = {'Mario':'d/d9/MK8_Mario_Icon.png','Luigi':'5/51/MK8_Luigi_Icon.png','Peach':'c/c2/MK8_Peach_Icon.png','Daisy':'3/32/MK8_Daisy_Icon.png','Rosalina':'8/89/MK8_Rosalina_Icon.png','Yoshi':'9/91/MK8_Yoshi_Icon.png','Toad':'4/45/MK8_Toad_Icon.png','Toadette':'8/8e/MK8_Toadette_Icon.png','Bowser':'4/47/MK8_Bowser_Icon.png','Bowser Jr.':'1/15/MK8_Bowser_Jr._Icon.png','Donkey Kong':'b/bf/MK8_Donkey_Kong_Icon.png','Diddy Kong':'0/00/MK8_Diddy_Kong_Icon.png','Funky Kong':'6/66/MK8_Funky_Kong_Icon.png','Wario':'c/c2/MK8_Wario_Icon.png','Waluigi':'7/78/MK8_Waluigi_Icon.png','Koopa Troopa':'9/9e/MK8_Koopa_Troopa_Icon.png','Shy Guy':'5/54/MK8_Shy_Guy_Icon.png','Lakitu':'7/7d/MK8_Lakitu_Icon.png','Baby Mario':'7/71/MK8_Baby_Mario_Icon.png','Baby Peach':'f/f7/MK8_Baby_Peach_Icon.png','Baby Luigi':'f/f9/MK8_Baby_Luigi_Icon.png','Baby Daisy':'7/78/MK8_Baby_Daisy_Icon.png','Baby Rosalina':'1/1c/MK8_Baby_Rosalina_Icon.png','King Boo':'f/f3/MK8_King_Boo_Icon.png','Dry Bones':'7/76/MK8_Dry_Bones_Icon.png','Dry Bowser':'2/29/MK8_Dry_Bowser_Icon.png','Birdo':'3/37/MK8_Birdo_Icon.png','Pauline':'8/8f/MK8_Pauline_Icon.png','Metal Mario':'8/81/MK8_Metal_Mario_Icon.png','Pink Gold Peach':'5/5a/MK8_Pink_Gold_Peach_Icon.png','Link':'e/e8/MK8_Link_Icon.png','Isabelle':'2/20/MK8_Isabelle_Icon.png','Villager':'4/41/MK8_Villager_Icon.png','Inkling':'6/65/MK8_Inkling_Girl_Icon.png','Mii':'d/de/MK8_Mii_Icon.png','Gold Mario':'a/ac/MK8_Gold_Mario_Icon.png','Cat Peach':'a/ad/MK8_Cat_Peach_Icon.png','Tanooki Mario':'a/a2/MK8_Tanooki_Mario_Icon.png','Larry':'c/c2/MK8_Larry_Icon.png','Lemmy':'f/fc/MK8_Lemmy_Icon.png','Wendy':'d/d9/MK8_Wendy_Icon.png','Ludwig':'a/a8/MK8_Ludwig_Icon.png','Iggy':'d/dd/MK8_Iggy_Icon.png','Roy':'3/3e/MK8_Roy_Icon.png','Morton':'7/72/MK8_Morton_Icon.png'};
+const THEMES = {
+  'Blau-Violett': ['#00b7ff','#2f57ff','#8c4dff'],
+  'Feuer':        ['#ffb300','#ff5a1f','#c8102e'],
+  'Gras':         ['#7be04a','#1fae5b','#0b7a6a'],
+  'Sternenstaub': ['#ff7ad9','#b17bff','#4a39ff'],
+  'Nacht':        ['#4a5578','#262d52','#0d1130'],
+  'Ozean':        ['#7af0ff','#0aa5d8','#0b3d91'],
+  'Sonnenuntergang': ['#ffd35a','#ff7a45','#d1307a'],
+  'Bonbon':       ['#ffc2e6','#ff6fb5','#a83cff'],
+  'Mint':         ['#b9ffe0','#35d6a5','#1a8fb8'],
+  'Gold':         ['#fff0a0','#f2b705','#a86a00'],
+  'Rennflagge':   ['#8a8a8a','#c8102e','#1a1a1a'],
+  'Toxic':        ['#e8ff4a','#8ae600','#3a6b00'],
+  'Lava':         ['#ff9f43','#e8341c','#5a0f2e'],
+};
+const PLATFORMS = ['Switch','PC','Xbox','PlayStation','VR','Handy'];
+const state = { charImg:null, theme:'Blau-Violett', platforms:new Set(), photo:null, avatar:null, mainImg:null };
+
+// --- UI aufbauen
+const themeBox = $('themes');
+Object.entries(THEMES).forEach(([n,c])=>{
+  const b=document.createElement('button'); b.className='theme-btn'; b.title=n; b.type='button';
+  b.style.background=`linear-gradient(135deg,${c[0]},${c[1]} 50%,${c[2]})`;
+  b.onclick=()=>{state.theme=n; sync(); draw();}; b.dataset.t=n; themeBox.append(b);
+});
+const platBox=$('platforms');
+PLATFORMS.forEach(p=>{
+  const c=document.createElement('span'); c.className='chip'; c.textContent=p; c.setAttribute('aria-pressed','false');
+  c.onclick=()=>{state.platforms.has(p)?state.platforms.delete(p):state.platforms.add(p); sync(); draw();}; platBox.append(c);
+});
+function sync(){
+  themeBox.querySelectorAll('.theme-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===state.theme));
+  platBox.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',state.platforms.has(c.textContent)));
+}
+
+// --- Bilder laden (nur lokal via Object-URL)
+function loadImg(input, key, thumb){
+  input.onchange=()=>{
+    const f=input.files[0]; if(!f) return;
+    const img=new Image(); img.onload=()=>{ state[key]=img; thumb.src=img.src; thumb.style.display='block'; draw(); };
+    img.src=URL.createObjectURL(f);
+  };
+}
+loadImg($('photoFile'),'photo',$('photoThumb'));
+loadImg($('avatarFile'),'avatar',$('avatarThumb'));
+loadImg($('mainFile'),'mainImg',$('mainThumb'));
+Object.keys(CHARS).forEach(n=>$('main').add(new Option(n,n)));
+// Standardbild: Charakter-Icon vom Mario-Wiki; bei Fehler Farb-Emblem
+function loadChar(){
+  state.charImg=null; const n=$('main').value; if(!n) return draw();
+  const img=new Image(); img.onload=()=>{ if($('main').value===n){state.charImg=img; draw();} }; img.crossOrigin='anonymous'; img.src='https://mario.wiki.gallery/images/'+ICONS[n];
+  draw();
+}
+$('main').addEventListener('change',loadChar);
+
+// --- Zeichnen
+let H=1350; const cv=$('cv'), ctx=cv.getContext('2d'), W=1080, F='"Trebuchet MS","Verdana",sans-serif';
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function fit(txt,maxW,size,weight='800'){ let s=size; do{ ctx.font=`${weight} ${s}px ${F}`; s-=2; }while(ctx.measureText(txt).width>maxW && s>16); return txt; }
+function wrap(txt,maxW,maxLines){
+  const words=txt.split(/\s+/), lines=[]; let cur='';
+  for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW && cur){lines.push(cur);cur=w}else cur=t; }
+  if(cur) lines.push(cur); return lines.slice(0,maxLines);
+}
+function circleImg(img,cx,cy,r,zoom=1,px=0,py=0){
+  ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,r,0,7); ctx.clip();
+  if(img){
+    const s=Math.max(2*r/img.width,2*r/img.height)*zoom, w=img.width*s, h=img.height*s;
+    const ox=(w-2*r)/2*px, oy=(h-2*r)/2*py;
+    ctx.drawImage(img,cx-w/2-ox,cy-h/2-oy,w,h);
+  } else {
+    ctx.fillStyle='#e8edff'; ctx.fillRect(cx-r,cy-r,2*r,2*r);
+    ctx.fillStyle='#9aa8e8'; ctx.beginPath(); ctx.arc(cx,cy-r*.15,r*.32,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx,cy+r*.75,r*.62,r*.5,0,0,7); ctx.fill();
+  }
+  ctx.restore();
+}
+function imgBox(img,x,y,w,h,r,border){
+  rr(x-6,y-6,w+12,h+12,r+4); ctx.fillStyle=border; ctx.fill();
+  ctx.save(); rr(x,y,w,h,r); ctx.clip();
+  const s=Math.max(w/img.width,h/img.height); ctx.drawImage(img,x+w/2-img.width*s/2,y+h/2-img.height*s/2,img.width*s,img.height*s);
+  ctx.restore();
+}
+function draw(){
+  const v=id=>$(id).value.trim(), c=THEMES[state.theme];
+  const acc=[['NINTENDO','#e60012','nintendo'],['STEAM','#1b2838','steam'],['XBOX','#107c10','xbox'],['PSN','#003791','psn'],['DISCORD','#5865f2','discord'],['SONSTIGES','#00a0d6','other']].filter(a=>v(a[2]));
+  const tw=(W-60-68-20)/2, th=84, py0=560;
+  ctx.font=`italic 700 28px ${F}`; const bioL=v('bio')?wrap('„'+v('bio')+'“',W-60-68-40,3):[];
+  const hasB=v('times')||state.platforms.size, hasC=v('games');
+  const need=py0+88+Math.max(1,Math.ceil(acc.length/2))*(th+14)+22+26+((state.mainImg||v('main'))?124:84)+(hasB?92:0)+(hasC?84:0)+(bioL.length?bioL.length*38+50:0)+80;
+  H=Math.max(1180,need); cv.height=H; $('size').textContent=W+' × '+H;
+  // Hintergrund
+  let g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#050712'); g.addColorStop(1,'#10153a'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=.06; ctx.fillStyle='#fff';
+  for(let y=0;y<H;y+=44) for(let x=((y/44)%2)*44;x<W;x+=88) ctx.fillRect(x,y,44,44);
+  ctx.globalAlpha=1;
+  // Hero
+  g=ctx.createLinearGradient(0,0,W,0); g.addColorStop(0,c[0]); g.addColorStop(.45,c[1]); g.addColorStop(1,c[2]);
+  rr(30,30,W-60,330,36); ctx.fillStyle=g; ctx.fill(); ctx.lineWidth=4; ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.stroke();
+  ctx.save(); rr(30,30,W-60,330,36); ctx.clip(); ctx.fillStyle='rgba(255,255,255,.12)'; ctx.beginPath(); ctx.moveTo(620,30); ctx.lineTo(760,30); ctx.lineTo(560,360); ctx.lineTo(420,360); ctx.fill(); ctx.restore();
+  const tag='🏁  SPIELERKARTE  ·  '+GROUP.toUpperCase(); ctx.font=`800 24px ${F}`; ctx.fillStyle='rgba(10,22,77,.45)'; rr(60,56,ctx.measureText(tag).width+36,46,14); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font=`800 24px ${F}`; ctx.textBaseline='middle'; ctx.fillText(tag,78,80);
+  // Avatar
+  const ax=235, ay=370, ar=160;
+  ctx.beginPath(); ctx.arc(ax,ay,ar+14,0,7); ctx.fillStyle=c[1]; ctx.fill();
+  ctx.beginPath(); ctx.arc(ax,ay,ar+6,0,7); ctx.fillStyle='#fff'; ctx.fill();
+  circleImg(state.photo,ax,ay,ar,+$('zoom').value,+$('panX').value,+$('panY').value);
+  if(state.avatar){
+    const bx=ax+ar*.74, by=ay+ar*.74, br=64;
+    ctx.beginPath(); ctx.arc(bx,by,br+8,0,7); ctx.fillStyle='#e60012'; ctx.fill();
+    circleImg(state.avatar,bx,by,br);
+    ctx.beginPath(); ctx.arc(bx,by,br,0,7); ctx.lineWidth=5; ctx.strokeStyle='#fff'; ctx.stroke();
+  }
+  // Name
+  const tx=440; ctx.fillStyle='#fff'; ctx.textBaseline='alphabetic';
+  ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=10; ctx.shadowOffsetY=3;
+  fit((v('alias')||'Alias').toUpperCase(),W-tx-60,70); ctx.fillText((v('alias')||'Alias').toUpperCase(),tx,185);
+  ctx.shadowColor='transparent';
+  ctx.font=`700 36px ${F}`; ctx.fillStyle='rgba(255,255,255,.92)'; ctx.fillText(v('name')||'Dein Name',tx,240);
+  let loc=v('city')&&'📍 '+v('city');
+  ctx.font=`700 28px ${F}`; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.fillText(loc||'📍 Ort',tx,290);
+  // Panel
+  rr(30,py0,W-60,H-py0-30,30); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.save(); rr(30,py0,W-60,H-py0-30,30); ctx.clip();
+  ctx.fillStyle='#f4f7ff'; ctx.fillRect(30,py0,W-60,64);
+  ctx.fillStyle='#1f35b8'; ctx.fillRect(30,py0+64,W-60,3);
+  ctx.restore();
+  ctx.fillStyle='#253061'; ctx.font=`800 26px ${F}`; ctx.fillText('ACCOUNTS',64,py0+42);
+  acc.forEach((a,i)=>{
+    const x=64+(i%2)*(tw+20), y=py0+88+Math.floor(i/2)*(th+14);
+    rr(x,y,tw,th,16); ctx.fillStyle='#f4f7ff'; ctx.fill(); ctx.strokeStyle='#dbe2ff'; ctx.lineWidth=2; ctx.stroke();
+    rr(x,y,12,th,6); ctx.fillStyle=a[1]; ctx.fill();
+    ctx.fillStyle=a[1]==='#1b2838'?'#4a5578':a[1]; ctx.font=`800 18px ${F}`; ctx.fillText(a[0],x+30,y+30);
+    ctx.fillStyle='#14172b'; fit(v(a[2]),tw-50,30); ctx.fillText(v(a[2]),x+30,y+66);
+  });
+  if(!acc.length){ ctx.fillStyle='#9aa8e8'; ctx.font=`700 26px ${F}`; ctx.fillText('Noch keine Accounts eingetragen …',64,py0+130); }
+  let y=py0+88+Math.max(1,Math.ceil(acc.length/2))*(th+14)+22;
+  // Details
+  ctx.fillStyle='#253061'; ctx.font=`800 26px ${F}`; ctx.fillText('ZOCKER-DETAILS',64,y); y+=26;
+  const lab=(t,x,yy)=>{ ctx.fillStyle='#5f6893'; ctx.font=`800 17px ${F}`; ctx.fillText(t,x,yy); };
+  const rx=64+tw+20;
+  let mx=64, rh=84;
+  const mi=state.mainImg||state.charImg;
+  if(mi||v('main')){
+    if(mi) imgBox(mi,70,y+6,100,100,22,c[1]);
+    else { const e=CHARS[v('main')]||['#4a5578','?']; rr(64,y,112,112,26); ctx.fillStyle=c[1]; ctx.fill(); rr(70,y+6,100,100,22); ctx.fillStyle=e[0]; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font=`800 ${e[1].length>2?36:e[1].length>1?46:58}px ${F}`; ctx.textBaseline='middle'; ctx.fillText(e[1],120,y+58); ctx.textAlign='left'; ctx.textBaseline='alphabetic'; }
+    mx=196; rh=124;
+  }
+  lab('MAIN',mx,y+30); ctx.fillStyle='#14172b'; fit(v('main')||'–',tw-(mx-64),28,'700'); ctx.fillText(v('main')||'–',mx,y+66);
+  lab('MARIO KART',rx,y+30); ctx.fillStyle='#14172b'; fit(v('mk'),tw,26,'700'); ctx.fillText(v('mk'),rx,y+66);
+  y+=rh;
+  if(hasB){
+    if(v('times')){ lab('ZOCKT',64,y+20); ctx.fillStyle='#14172b'; fit(v('times'),tw,28,'700'); ctx.fillText(v('times'),64,y+56); }
+    if(state.platforms.size){
+      lab('PLATTFORMEN',rx,y+20);
+      let cx=rx, cy=y+32; ctx.font=`800 20px ${F}`;
+      [...state.platforms].forEach(p=>{
+        const w=ctx.measureText(p).width+28; if(cx+w>W-64){cx=rx;cy+=42}
+        rr(cx,cy,w,34,17); g=ctx.createLinearGradient(cx,0,cx+w,0); g.addColorStop(0,c[1]); g.addColorStop(1,c[2]); ctx.fillStyle=g; ctx.fill();
+        ctx.fillStyle='#fff'; ctx.fillText(p,cx+14,cy+24); cx+=w+8;
+      });
+    }
+    y+=92;
+  }
+  if(hasC){ lab('MEINE GAMES',64,y+20); ctx.fillStyle='#14172b'; fit(v('games'),W-128,28,'700'); ctx.fillText(v('games'),64,y+56); y+=84; }
+  y+=6;
+  // Bio
+  if(bioL.length){
+    ctx.font=`italic 700 28px ${F}`; const L=bioL;
+    const bh=L.length*38+30; rr(64,y,W-128,bh,18); const gg=ctx.createLinearGradient(64,0,W-64,0); gg.addColorStop(0,c[0]+'30'); gg.addColorStop(1,c[2]+'30'); ctx.fillStyle=gg; ctx.fill();
+    ctx.fillStyle='#253061'; L.forEach((l,i)=>ctx.fillText(l,84,y+42+i*38));
+  }
+  // Footer
+  ctx.fillStyle='#8a94c8'; ctx.font=`700 20px ${F}`; ctx.textAlign='right';
+  ctx.fillText(GROUP+' · '+new Date().toLocaleDateString('de-DE'),W-64,H-52); ctx.textAlign='left';
+  // Zähler
+  $('filled').textContent=TEXT.filter(k=>k!=='mk'&&v(k)).length+' Felder';
+}
+
+// --- Events
+[...TEXT,'zoom','panX','panY'].forEach(id=>$(id).addEventListener('input',draw));
+const blob=()=>new Promise((res,rej)=>{ try{ cv.toBlob(b=>b?res(b):rej(),'image/png'); }catch(e){ rej(e); } });
+$('dl').onclick=async()=>{ let b; try{ b=await blob(); }catch{ alert('Export fehlgeschlagen – bitte die Seite neu laden oder ein eigenes Bild verwenden.'); return; } const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=(($('alias').value||$('name').value||'spieler').trim().replace(/\W+/g,'_'))+'_karte.png'; a.click(); };
+$('cp').onclick=async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({'image/png':await blob()})]); $('cp').textContent='✔ Kopiert!'; }catch{ $('cp').textContent='Nicht möglich – bitte PNG speichern'; } setTimeout(()=>$('cp').textContent='📋 In Zwischenablage',2200); };
+$('sv').onclick=()=>{ try{ const d={theme:state.theme,platforms:[...state.platforms]}; TEXT.forEach(k=>d[k]=$(k).value); localStorage.setItem('spielerkarte',JSON.stringify(d)); $('sv').textContent='✔ Gemerkt'; }catch{ $('sv').textContent='Speichern nicht möglich'; } setTimeout(()=>$('sv').textContent='💾 Entwurf merken',2000); };
+$('rs').onclick=()=>{ try{localStorage.removeItem('spielerkarte')}catch{} loadExample(); };
+try{ const d=JSON.parse(localStorage.getItem('spielerkarte')||'null'); if(d){ TEXT.forEach(k=>{if(d[k]!=null)$(k).value=d[k]}); state.theme=d.theme||state.theme; state.platforms=new Set(d.platforms||[]); } }catch{}
+// Beispieltexte: als Vorgabe eingetragen (werden beim Tippen ersetzt) und als Platzhalter für leere Felder
+const EXAMPLE = {
+  name:'Alex Beispiel', alias:'TurboToad', city:'Hamburg',
+  bio:'Item-Glück ist auch ein Skill. Blaue Panzer treffen immer die Richtigen.',
+  nintendo:'SW-1234-5678-9012', steam:'turbotoad', xbox:'TurboToad88', psn:'Turbo_Toad', discord:'turbotoad', other:'Battle.net: Turbo#2210',
+  main:'Toadette', times:'MK8 Mittwoch, MKW Sonntag', games:'Fortnite, MarioKart, Rocket League', mk:'Mario Kart 8 Deluxe + World'
+};
+Object.entries(EXAMPLE).forEach(([k,t])=>{ if($(k).tagName!=='SELECT') $(k).placeholder=t; });
+function loadExample(){ Object.entries(EXAMPLE).forEach(([k,t])=>$(k).value=t); state.platforms=new Set(['Switch','VR']); state.theme='Blau-Violett'; sync(); loadChar(); }
+document.querySelectorAll('input[type=text],textarea').forEach(e=>e.addEventListener('focus',()=>e.select()));
+$('cl').onclick=()=>{ TEXT.forEach(k=>{ $(k).value=''; }); $('mk').selectedIndex=0; state.platforms=new Set(); try{localStorage.removeItem('spielerkarte')}catch{} sync(); loadChar(); };
+let hasDraft=false; try{ hasDraft=!!localStorage.getItem('spielerkarte'); }catch{}
+if(!hasDraft) loadExample(); else { sync(); loadChar(); }
+</script>
+</body>
+</html>
